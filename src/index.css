@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-brand-800: #065f46;
+  --color-brand-900: #064e3b;
+  --color-surface: #f8fafc;
+  --color-card: #ffffff;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+* { box-sizing: border-box; }
+
+:root {
+  --tenant-primary: #f97316;
+  --tenant-sidebar-bg: #1a2832;
+  --tenant-primary-soft: #f973161a;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-surface);
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { min-height: 100dvh; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+@media (max-width: 768px) {
+  .sidebar-desktop { display: none !important; }
+  .bottom-nav { display: flex !important; }
+}
+
+@media (min-width: 769px) {
+  .bottom-nav { display: none !important; }
+}
+
+/* Today Sales Hero KPI — animated gradient mesh */
+@keyframes hero-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes hero-shimmer {
+  0% { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(200%) skewX(-12deg); }
+}
+@keyframes hero-orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(8px, -6px) scale(1.05); }
+}
+
+.today-hero-gradient {
+  background-size: 200% 200%;
+  animation: hero-gradient-shift 8s ease infinite;
+}
+.today-hero-shimmer {
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%);
+  animation: hero-shimmer 4s ease-in-out infinite;
+}
+.today-hero-orb { animation: hero-orb-float 6s ease-in-out infinite; }
+.today-hero-orb-delayed { animation: hero-orb-float 8s ease-in-out infinite 1s; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.35s ease-out; }
