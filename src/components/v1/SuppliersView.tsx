@@ -58,6 +58,7 @@ import {
 } from '@/lib/businessEngine';
 import confetti from 'canvas-confetti';
 import { api } from '@/lib/api';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 import { mapSupplier, mapPurchaseOrder, mapEvent, optionalApiDate, supplierToApiPayload, eventToApiPayload, filterByBranchId, filterPurchaseOrdersByBranch } from '@/lib/apiSync';
 import { exportProcurementReport } from '@/utils/reportGenerator';
 import {
@@ -1277,10 +1278,9 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
       )}
 
       {/* ================= MODAL 1: INTERACTIVE PURCHASE ORDER CREATOR ================= */}
-      {isCreatingPO && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-4xl w-full border border-[#E1DFDD] shadow-2xl p-6 space-y-4 my-8">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 border-b border-[#EDEBE9] pb-3">
+      <ModalPortal open={isCreatingPO} onClose={() => setIsCreatingPO(false)}>
+          <div className="bg-white rounded-2xl max-w-4xl w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92dvh,920px)] overflow-hidden">
+            <div className="shrink-0 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 border-b border-[#EDEBE9] px-5 sm:px-6 pt-4 pb-3">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-wide text-[#E65100]">
                   {isSw ? 'Ombi la Nukuu Bei' : 'Request for Quotation'}
@@ -1302,12 +1302,13 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
                   <ChevronRight className="w-3 h-3 text-[#605E5C]" />
                   <span className="px-2 py-1 rounded-full bg-[#F3F2F1] text-[#605E5C]">{isSw ? 'Agizo' : 'PO'}</span>
                 </div>
-                <button onClick={() => setIsCreatingPO(false)} className="text-[#605E5C] hover:text-black p-1">
+                <button type="button" onClick={() => setIsCreatingPO(false)} className="text-[#605E5C] hover:text-black p-1">
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 sm:px-6 py-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div>
                 <label className="block font-bold text-[#323130] mb-1">{isSw ? 'Msambazaji *' : 'Vendor *'}</label>
@@ -1880,9 +1881,10 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
             </div>
             </>
             )}
+            </div>
 
-            {/* Modal Actions */}
-            <div className="flex items-center justify-between pt-2 border-t border-[#EDEBE9]">
+            {/* Modal Actions — always visible */}
+            <div className="shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 py-3 border-t border-[#EDEBE9] bg-white">
               <button
                 type="button"
                 onClick={() => setIsCreatingPO(false)}
@@ -1909,12 +1911,11 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
               </div>
             </div>
           </div>
-        </div>
-      )}
+      </ModalPortal>
 
       {/* ================= MODAL 2: VIEW GRN / PURCHASE ORDER DETAILS ================= */}
       {isViewGRNModalOpen && selectedPO && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-2xl w-full border border-[#E1DFDD] shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <div className="flex items-center gap-2">
@@ -2009,7 +2010,7 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
 
       {/* ================= MODAL 3: ADD NEW SUPPLIER ================= */}
       {isAddingSupplier && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start justify-center p-4 overflow-y-auto">
           <form onSubmit={handleSaveNewSupplier} className="bg-white rounded-2xl max-w-md w-full border border-[#E1DFDD] shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130]">Register New Supplier</h3>
@@ -2088,7 +2089,7 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
 
       {/* ================= MODAL 4: RECORD SUPPLIER PAYMENT ================= */}
       {isRecordingPayment && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start justify-center p-4 overflow-y-auto">
           <form onSubmit={handleSavePayment} className="bg-white rounded-2xl max-w-md w-full border border-[#E1DFDD] shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130]">Record Supplier Settlement Payment</h3>

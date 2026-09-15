@@ -317,6 +317,7 @@ export function buildAppModules(businessType: BusinessType): AppModule[] {
     {
       id: 'people',
       hubTab: 'module-people',
+      directTab: 'staff',
       labelEn: 'People',
       labelSw: 'Watu',
       hintEn: 'Staff, HR, payroll, and stipends',

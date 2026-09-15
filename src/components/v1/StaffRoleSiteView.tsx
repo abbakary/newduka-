@@ -1764,7 +1764,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
     <div className="space-y-6">
       {/* Dynamic Action Notification Toast */}
       {actionSuccessMsg && (
-        <div className="fixed top-16 right-6 z-50 bg-[#107C10] text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-bold animate-fade-in">
+        <div className="fixed top-16 right-6 z-[300] bg-[#107C10] text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-bold animate-fade-in">
           <CheckCircle2 className="w-4 h-4 text-white" />
           <span>{actionSuccessMsg}</span>
         </div>
@@ -2056,7 +2056,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
 
       {/* MODAL: REQUEST SALARY ADVANCE */}
       {isAdvanceModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#F3F2F1] pb-3">
               <div className="flex items-center gap-2">
@@ -2132,7 +2132,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
 
       {/* MODAL: STAFF DIGITAL PAYSLIP */}
       {isPayslipModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#F3F2F1] pb-3">
               <div className="flex items-center gap-2">
@@ -2210,7 +2210,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 1: Cash Drawer Shift Tally & Denominations Counter */}
       {/* ========================================================================= */}
       {isCashDrawerModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-lg w-full p-6 space-y-4 text-xs font-sans max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2320,7 +2320,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 2: Clinical Prescription Verification Modal */}
       {/* ========================================================================= */}
       {isPrescriptionModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-lg w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2375,7 +2375,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 3: Controlled Substances (DDA) Log Modal */}
       {/* ========================================================================= */}
       {isControlledDrugModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-md w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2427,7 +2427,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 4: Goods Inward PO Receiving Bay Modal */}
       {/* ========================================================================= */}
       {isReceivePOModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-lg w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2486,7 +2486,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 5: Physical Stock Take & Cycle Count Modal */}
       {/* ========================================================================= */}
       {isStockTakeModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-lg w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2544,7 +2544,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 6: Inter-Branch Transfer Modal */}
       {/* ========================================================================= */}
       {isInterBranchTransferModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-md w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2607,7 +2607,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 7: TRA EFD & Bank Reconciliation Modal */}
       {/* ========================================================================= */}
       {isTraReconcileModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-lg w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2659,7 +2659,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 8: Supplier Payment Modal */}
       {/* ========================================================================= */}
       {isSupplierPaymentModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-md w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2710,7 +2710,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 9: Receipt Details & Reprint */}
       {/* ========================================================================= */}
       {isReceiptModalOpen && selectedReceipt && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-md w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -2776,7 +2776,7 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
       {/* MODAL 10: Staff Roster Scheduler Modal */}
       {/* ========================================================================= */}
       {isRosterModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-lg w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">

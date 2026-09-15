@@ -1239,6 +1239,13 @@ export const POSView: React.FC<POSViewProps> = ({
                   />
                 </div>
               )}
+              {!canToggleSaleVat && taxSettings.mode !== 'tra_efd' && (
+                <p className="text-[10px] text-[#8A8886] leading-snug py-0.5">
+                  {isSw
+                    ? 'Chaguo la Na VAT / Bila VAT linaonekana tu duka lililosajiliwa VAT (Mipangilio → TRA/VAT). Hakikisha tawi halibatilishi hali ya VAT.'
+                    : 'With VAT / No VAT appears only when the shop is VAT-registered (Settings → TRA/VAT). Ensure the branch inherits org VAT status.'}
+                </p>
+              )}
               {canToggleSaleVat && (
                 <div className="flex items-center justify-between gap-2 py-1">
                   <span className="font-semibold text-[#323130]">{isSw ? 'VAT 18% kwenye mauzo' : 'VAT 18% on this sale'}</span>

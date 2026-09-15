@@ -1408,7 +1408,8 @@ export default function DukaPortal() {
         )}
 
         {/* Scrollable View Container */}
-        <main className={`flex-1 overflow-y-auto p-4 md:p-6 rounded-2xl shadow-sm ${isSuperAdminMode ? 'bg-[#F9F9F7] border border-[#003322]/10' : 'bg-white/80 backdrop-blur-sm border border-[#E1DFDD]/80'}`}>
+        {/* Avoid backdrop-filter/transform here — they trap position:fixed modals inside the scroll pane. */}
+        <main className={`flex-1 overflow-y-auto p-4 md:p-6 rounded-2xl shadow-sm ${isSuperAdminMode ? 'bg-[#F9F9F7] border border-[#003322]/10' : 'bg-white border border-[#E1DFDD]/80'}`}>
           <div className="max-w-7xl mx-auto">
             {!isSuperAdminMode && (
               <ModuleContextBar

@@ -947,7 +947,7 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
 
           {/* Edit Rates Modal */}
           {editingStaffId && (
-            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
               <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
                 <div className="flex items-center justify-between border-b border-[#F3F2F1] pb-3">
                   <h3 className="font-bold text-base text-[#323130]">
@@ -1271,7 +1271,7 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
 
       {/* MODAL 1: ADD NEW EXPENSE */}
       {isAddExpenseOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#F3F2F1] pb-3">
               <div className="flex items-center gap-2">
@@ -1418,7 +1418,7 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
 
       {/* MODAL 2: PAY SALARY MODAL */}
       {isPaySalaryModalOpen && selectedStaffForPay && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#F3F2F1] pb-3">
               <div className="flex items-center gap-2">
@@ -1492,7 +1492,7 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
 
       {/* MODAL 3: OFFICIAL TANZANIAN PAYSLIP VIEW */}
       {selectedPayslip && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#F3F2F1] pb-3">
               <div className="flex items-center gap-2">
@@ -1580,7 +1580,7 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
 
       {/* MODAL: RECORD SALARY ADVANCE */}
       {isRecordAdvanceOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#F3F2F1] pb-3">
               <div className="flex items-center gap-2">
@@ -1643,7 +1643,7 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
 
       {/* MODAL: EDIT BASE SALARY */}
       {editingBaseSalaryStaffId && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-[#F3F2F1] pb-3">
               <h3 className="font-bold text-base text-[#323130]">

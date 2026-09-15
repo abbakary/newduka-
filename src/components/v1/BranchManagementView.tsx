@@ -1132,7 +1132,7 @@ export const BranchManagementView: React.FC<BranchManagementViewProps> = ({
 
       {/* 8. MODAL: ADD / EDIT BRANCH */}
       {isAddBranchModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[min(90vh,calc(100dvh-2rem))] flex flex-col shadow-2xl border border-[#E1DFDD] animate-in fade-in zoom-in-95 my-auto">
             <div className="flex items-center justify-between shrink-0 px-6 pt-6 pb-4 border-b border-[#EDEBE9]">
               <div className="flex items-center gap-2">
@@ -1403,7 +1403,7 @@ export const BranchManagementView: React.FC<BranchManagementViewProps> = ({
 
       {/* 9. MODAL: INTER-BRANCH STOCK TRANSFER */}
       {isTransferModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-[#E1DFDD] animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between pb-4 border-b border-[#EDEBE9]">
               <div className="flex items-center gap-2">
@@ -1576,7 +1576,7 @@ export const BranchManagementView: React.FC<BranchManagementViewProps> = ({
 
       {/* 10. MODAL: UPGRADE TO ENTERPRISE */}
       {isUpgradeModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-[#E1DFDD] animate-in fade-in zoom-in-95 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-[#EDEBE9]">
               <div className="flex items-center gap-2">

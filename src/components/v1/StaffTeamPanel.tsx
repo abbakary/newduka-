@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Plus,
   Search,
@@ -12,6 +12,7 @@ import {
 import { api } from '@/lib/api';
 import { resolveStaffPermissions } from '@/lib/apiSync';
 import { loadPayrollStore, savePayrollStore } from '@/lib/payrollStore';
+import { ModalPortal, ToastPortal } from '@/components/ui/ModalPortal';
 import type { AuthUser, Language, StaffMember, StaffPermissions, StaffRole } from '@/types/v1';
 
 interface StaffTeamPanelProps {
@@ -19,6 +20,10 @@ interface StaffTeamPanelProps {
   staffList: StaffMember[];
   setStaffList: React.Dispatch<React.SetStateAction<StaffMember[]>>;
   currentUser?: AuthUser | null;
+  /** Open the Add Staff dialog immediately (e.g. when landing on Watu). */
+  initialAddOpen?: boolean;
+  /** External signal to open Add Staff (increments / changes to trigger). */
+  addOpenSignal?: number;
 }
 
 const defaultPermissions = (): StaffPermissions => ({
@@ -90,12 +95,14 @@ export const StaffTeamPanel: React.FC<StaffTeamPanelProps> = ({
   staffList,
   setStaffList,
   currentUser,
+  initialAddOpen = false,
+  addOpenSignal = 0,
 }) => {
   const isSw = language === 'sw';
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [toast, setToast] = useState<string | null>(null);
-  const [addOpen, setAddOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(initialAddOpen);
   const [deleteTarget, setDeleteTarget] = useState<StaffMember | null>(null);
   const [editTarget, setEditTarget] = useState<StaffMember | null>(null);
   const [form, setForm] = useState({
@@ -109,6 +116,10 @@ export const StaffTeamPanel: React.FC<StaffTeamPanelProps> = ({
     shift: 'Morning',
     permissions: rolePreset('Cashier'),
   });
+
+  useEffect(() => {
+    if (addOpenSignal > 0) setAddOpen(true);
+  }, [addOpenSignal]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -232,10 +243,12 @@ export const StaffTeamPanel: React.FC<StaffTeamPanelProps> = ({
   return (
     <div className="space-y-4">
       {toast && (
-        <div className="fixed top-16 right-6 z-50 bg-[#107C10] text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 text-xs font-semibold">
-          <CheckCircle2 className="w-4 h-4" />
-          {toast}
-        </div>
+        <ToastPortal>
+          <div className="bg-[#107C10] text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 text-xs font-semibold">
+            <CheckCircle2 className="w-4 h-4" />
+            {toast}
+          </div>
+        </ToastPortal>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -363,8 +376,7 @@ export const StaffTeamPanel: React.FC<StaffTeamPanelProps> = ({
         </div>
       </div>
 
-      {addOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <ModalPortal open={addOpen} onClose={() => setAddOpen(false)}>
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-xl max-w-lg w-full p-5 text-xs max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-bold text-sm flex items-center gap-2">
@@ -444,13 +456,12 @@ export const StaffTeamPanel: React.FC<StaffTeamPanelProps> = ({
               </div>
             </form>
           </div>
-        </div>
-      )}
+      </ModalPortal>
 
-      {editTarget && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <ModalPortal open={Boolean(editTarget)} onClose={() => setEditTarget(null)}>
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-xl max-w-md w-full p-5 text-xs">
             <h4 className="font-bold text-sm mb-3">{isSw ? 'Hariri Mfanyakazi' : 'Edit Staff'}</h4>
+            {editTarget && (
             <form onSubmit={handleSaveEdit} className="space-y-3">
               <input
                 required
@@ -494,17 +505,16 @@ export const StaffTeamPanel: React.FC<StaffTeamPanelProps> = ({
                 </button>
               </div>
             </form>
+            )}
           </div>
-        </div>
-      )}
+      </ModalPortal>
 
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <ModalPortal open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)}>
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-xl max-w-sm w-full p-5 text-xs space-y-3">
             <p className="text-[#323130]">
               {isSw
-                ? `Ondoa ${deleteTarget.name} kutoka timu? Hawataweza kuingia tena.`
-                : `Remove ${deleteTarget.name} from the team? They will lose access immediately.`}
+                ? `Ondoa ${deleteTarget?.name} kutoka timu? Hawataweza kuingia tena.`
+                : `Remove ${deleteTarget?.name} from the team? They will lose access immediately.`}
             </p>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setDeleteTarget(null)} className="px-3 py-2 rounded-lg border text-xs font-semibold">
@@ -512,15 +522,14 @@ export const StaffTeamPanel: React.FC<StaffTeamPanelProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => confirmDelete(deleteTarget)}
+                onClick={() => deleteTarget && confirmDelete(deleteTarget)}
                 className="px-4 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold cursor-pointer"
               >
                 {isSw ? 'Ondoa' : 'Remove'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </ModalPortal>
     </div>
   );
 };

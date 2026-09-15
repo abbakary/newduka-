@@ -255,6 +255,15 @@ class ApiClient {
   getSuppliers() { return this.request<Array<Record<string, unknown>>>('/suppliers'); }
   createSupplier(data: Record<string, unknown>) { return this.request('/suppliers', { method: 'POST', body: JSON.stringify(data) }); }
   updateSupplier(id: string, data: Record<string, unknown>) { return this.request(`/suppliers/${id}`, { method: 'PATCH', body: JSON.stringify(data) }); }
+  paySupplier(id: string, data: { amount: number; payment_method?: string; notes?: string; branch_id?: string | null }) {
+    return this.request<{
+      supplier_id: string;
+      amount_paid: number;
+      balance_before: number;
+      balance_after: number;
+      updated_po_ids: string[];
+    }>(`/suppliers/${id}/pay`, { method: 'POST', body: JSON.stringify(data) });
+  }
   getBranches() { return this.request<Array<Record<string, unknown>>>('/branches'); }
   createBranch(data: Record<string, unknown>) {
     return this.request<Record<string, unknown>>('/branches', { method: 'POST', body: JSON.stringify(data) });

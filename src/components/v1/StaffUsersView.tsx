@@ -11,8 +11,10 @@ import {
   TrendingUp,
   LogIn,
   ArrowRight,
+  Plus,
 } from 'lucide-react';
 import { StaffTeamPanel } from '@/components/v1/StaffTeamPanel';
+import { ToastPortal } from '@/components/ui/ModalPortal';
 import { computeCashierLeaderboard } from '@/lib/analyticsCompute';
 import { getOpenCashierShift } from '@/lib/cashierShiftStore';
 import {
@@ -63,7 +65,7 @@ export const StaffUsersView: React.FC<StaffUsersViewProps> = ({
   const today = todayDateStr();
   const month = currentMonthStr();
 
-  const [tab, setTab] = useState<PeopleTab>('overview');
+  const [tab, setTab] = useState<PeopleTab>(() => (canManageStaffRBAC(currentUser) ? 'directory' : 'overview'));
   const [staffConfig, setStaffConfig] = useState<Record<string, StaffPayrollConfig>>({});
   const [payrollRecords, setPayrollRecords] = useState(() => loadPayrollStore(tenantId).payrollRecords);
   const [advances, setAdvances] = useState(() => loadPayrollStore(tenantId).advances);
@@ -71,6 +73,7 @@ export const StaffUsersView: React.FC<StaffUsersViewProps> = ({
   const [editRatesId, setEditRatesId] = useState<string | null>(null);
   const [rateDraft, setRateDraft] = useState({ baseSalary: 0, food: 0, transport: 0 });
   const [toast, setToast] = useState<string | null>(null);
+  const [addOpenSignal, setAddOpenSignal] = useState(0);
 
   useEffect(() => {
     const store = loadPayrollStore(tenantId);
@@ -195,10 +198,12 @@ export const StaffUsersView: React.FC<StaffUsersViewProps> = ({
   return (
     <div className="max-w-6xl mx-auto space-y-5 animate-in fade-in duration-300">
       {toast && (
-        <div className="fixed top-16 right-6 z-50 bg-[#107C10] text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 text-xs font-semibold">
-          <CheckCircle2 className="w-4 h-4" />
-          {toast}
-        </div>
+        <ToastPortal>
+          <div className="bg-[#107C10] text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 text-xs font-semibold">
+            <CheckCircle2 className="w-4 h-4" />
+            {toast}
+          </div>
+        </ToastPortal>
       )}
 
       <header className="flex flex-wrap items-start justify-between gap-4">
@@ -220,6 +225,19 @@ export const StaffUsersView: React.FC<StaffUsersViewProps> = ({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          {canTeam && (
+            <button
+              type="button"
+              onClick={() => {
+                setTab('directory');
+                setAddOpenSignal(n => n + 1);
+              }}
+              className="px-3.5 py-2 rounded-xl bg-[#107C10] hover:bg-[#0e6b0e] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {isSw ? 'Ongeza Mfanyakazi' : 'Add Staff'}
+            </button>
+          )}
           {onNavigate && (
             <>
               <button
@@ -455,6 +473,8 @@ export const StaffUsersView: React.FC<StaffUsersViewProps> = ({
             staffList={staffList}
             setStaffList={setStaffList}
             currentUser={currentUser}
+            initialAddOpen={staffList.length === 0}
+            addOpenSignal={addOpenSignal}
           />
         </div>
       )}
@@ -578,7 +598,7 @@ export const StaffUsersView: React.FC<StaffUsersViewProps> = ({
       )}
 
       {editRatesId && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-xl max-w-sm w-full p-5 text-xs space-y-3">
             <h4 className="font-bold text-sm text-[#323130]">
               {isSw ? 'Hariri malipo' : 'Edit compensation'}

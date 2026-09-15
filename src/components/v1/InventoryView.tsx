@@ -48,6 +48,7 @@ import { useTaxCompliance } from '@/context/TaxComplianceContext';
 import { isVatActive } from '@/lib/taxComplianceSettings';
 import { computePurchaseLineAmounts, type PurchaseVatScope } from '@/lib/purchaseTax';
 import { QRCodeModal } from '@/components/v1/QRCodeModal';
+import { ModalPortal } from '@/components/ui/ModalPortal';
 import { rememberProductImage } from '@/lib/productImageCache';
 import { compressProductImage, readFileAsDataUrl } from '@/lib/imageCompress';
 import confetti from 'canvas-confetti';
@@ -1441,11 +1442,10 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       )}
 
       {/* ================= MODAL 1: ADD NEW PRODUCT ================= */}
-      {isAddingProduct && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <ModalPortal open={isAddingProduct} onClose={() => setIsAddingProduct(false)}>
           <form
             onSubmit={handleSaveProduct}
-            className="bg-white rounded-2xl max-w-2xl w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92vh,880px)] overflow-hidden"
+            className="bg-white rounded-2xl max-w-2xl w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92dvh,880px)] overflow-hidden"
           >
             <div className="flex items-center justify-between border-b border-[#EDEBE9] px-6 py-4 shrink-0">
               <div className="flex items-center gap-2">
@@ -1666,14 +1666,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
           </form>
-        </div>
-      )}
+      </ModalPortal>
 
       {/* ================= MODAL 2: DIRECT MANUAL STOCK IN ================= */}
-      {isQuickStockInOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleExecuteManualStockIn} className="bg-white rounded-2xl max-w-md w-full border border-[#E1DFDD] shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
+      <ModalPortal open={isQuickStockInOpen} onClose={() => setIsQuickStockInOpen(false)}>
+          <form onSubmit={handleExecuteManualStockIn} className="bg-white rounded-2xl max-w-md w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92dvh,720px)] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[#EDEBE9] px-6 py-3 shrink-0">
               <div className="flex items-center gap-2">
                 <ArrowDownLeft className="w-5 h-5 text-[#107C10]" />
                 <h3 className="font-bold text-sm text-[#323130]">Manual Stock In Replenishment</h3>
@@ -1683,7 +1681,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-3 text-xs">
               <div>
                 <label className="block font-semibold text-[#323130] mb-1">Select Product *</label>
                 <select
@@ -1807,7 +1805,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#EDEBE9]">
+            <div className="shrink-0 flex justify-end gap-2 px-6 py-3 border-t border-[#EDEBE9] bg-[#FAF9F8]">
               <button
                 type="button"
                 onClick={() => setIsQuickStockInOpen(false)}
@@ -1823,14 +1821,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
           </form>
-        </div>
-      )}
+      </ModalPortal>
 
       {/* ================= MODAL 3: STOCK OUT / DAMAGE ADJUSTMENT ================= */}
-      {isStockOutOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleExecuteStockOut} className="bg-white rounded-2xl max-w-md w-full border border-[#E1DFDD] shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
+      <ModalPortal open={isStockOutOpen} onClose={() => setIsStockOutOpen(false)}>
+          <form onSubmit={handleExecuteStockOut} className="bg-white rounded-2xl max-w-md w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92dvh,720px)] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[#EDEBE9] px-6 py-3 shrink-0">
               <div className="flex items-center gap-2">
                 <ArrowUpRight className="w-5 h-5 text-[#D13438]" />
                 <h3 className="font-bold text-sm text-[#323130]">Stock Out & Damage Deduction</h3>
@@ -1840,7 +1836,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-3 text-xs">
               <div>
                 <label className="block font-semibold text-[#323130] mb-1">Product *</label>
                 <select
@@ -1899,7 +1895,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#EDEBE9]">
+            <div className="shrink-0 flex justify-end gap-2 px-6 py-3 border-t border-[#EDEBE9] bg-[#FAF9F8]">
               <button
                 type="button"
                 onClick={() => setIsStockOutOpen(false)}
@@ -1915,20 +1911,18 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
           </form>
-        </div>
-      )}
+      </ModalPortal>
 
       {/* Quick Add Supplier (from stock in/out) */}
-      {isQuickAddSupplierOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleQuickAddSupplier} className="bg-white rounded-2xl max-w-md w-full border border-[#E1DFDD] shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
+      <ModalPortal open={isQuickAddSupplierOpen} onClose={() => setIsQuickAddSupplierOpen(false)} zClassName="z-[210]">
+          <form onSubmit={handleQuickAddSupplier} className="bg-white rounded-2xl max-w-md w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92dvh,640px)] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[#EDEBE9] px-6 py-3 shrink-0">
               <h3 className="font-bold text-sm text-[#323130]">{isSw ? 'Ongeza Msambazaji' : 'Add Supplier'}</h3>
               <button type="button" onClick={() => setIsQuickAddSupplierOpen(false)} className="text-[#605E5C]">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-3 text-xs">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-3 text-xs">
               <input
                 required
                 placeholder={isSw ? 'Jina la kampuni *' : 'Company name *'}
@@ -1974,7 +1968,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 <option value="Prepayment">Prepayment</option>
               </select>
             </div>
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="shrink-0 flex justify-end gap-2 px-6 py-3 border-t border-[#EDEBE9] bg-[#FAF9F8]">
               <button type="button" onClick={() => setIsQuickAddSupplierOpen(false)} className="px-4 py-1.5 text-xs font-semibold text-[#605E5C] bg-[#F3F2F1] rounded-lg">
                 {t('cancel')}
               </button>
@@ -1983,8 +1977,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
           </form>
-        </div>
-      )}
+      </ModalPortal>
 
       {/* QR Code & Shelf Label Modal */}
       <QRCodeModal
@@ -1996,11 +1989,10 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       />
 
       {/* ================= MODAL: EDIT PRODUCT ================= */}
-      {editingProduct && editForm && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <ModalPortal open={Boolean(editingProduct && editForm)} onClose={() => { setEditingProduct(null); setEditForm(null); }}>
           <form
             onSubmit={handleSaveEdit}
-            className="bg-white rounded-2xl max-w-2xl w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92vh,860px)] overflow-hidden"
+            className="bg-white rounded-2xl max-w-2xl w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92dvh,860px)] overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[#EDEBE9] px-6 py-4 shrink-0">
@@ -2198,8 +2190,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
           </form>
-        </div>
-      )}
+      </ModalPortal>
     </div>
   );
 };

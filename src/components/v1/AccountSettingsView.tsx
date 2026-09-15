@@ -351,7 +351,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
     <div className="space-y-6 pb-12 font-sans">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-16 right-6 z-50 bg-[#107C10] text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-bold animate-fade-in">
+        <div className="fixed top-16 right-6 z-[300] bg-[#107C10] text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-bold animate-fade-in">
           <CheckCircle2 className="w-4 h-4 text-white" />
           <span>{toastMessage}</span>
         </div>
@@ -1017,7 +1017,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
       {/* MODAL 1: ADD NEW STAFF WITH ROLE PRESETS */}
       {isAddStaffModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-2xl w-full p-6 space-y-4 text-xs font-sans max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <div className="flex items-center gap-2">
@@ -1197,7 +1197,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
       {/* MODAL 2: EDIT STAFF DETAILS */}
       {editingStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-lg w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -1285,7 +1285,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
       {/* MODAL 3: PERMISSIONS MATRIX (RBAC) */}
       {permissionsStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-xl w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <div className="flex items-center gap-2">
@@ -1351,7 +1351,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
       {/* MODAL 4: PIN RESET & CREDENTIALS */}
       {pinResetStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-md w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <h3 className="font-bold text-sm text-[#323130] flex items-center gap-2">
@@ -1410,7 +1410,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
       {/* MODAL 5: AUDIT LOG DRAWER */}
       {auditLogStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-xl w-full p-6 space-y-4 text-xs font-sans max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#EDEBE9] pb-3">
               <div className="flex items-center gap-2">
@@ -1457,7 +1457,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
       {/* MODAL 6: SAFE DELETE CONFIRMATION */}
       {deleteConfirmStaff && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-start sm:items-center justify-center p-4 overflow-y-auto animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-2xl max-w-md w-full p-6 space-y-4 text-xs font-sans">
             <div className="flex items-center gap-3 text-rose-600">
               <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center font-bold text-lg">

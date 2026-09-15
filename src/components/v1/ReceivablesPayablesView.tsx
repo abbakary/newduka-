@@ -431,84 +431,97 @@ export const ReceivablesPayablesView: React.FC<ReceivablesPayablesViewProps> = (
 
     setIsSavingSettlement(true);
     try {
-      const raw = await api.updateSupplier(selectedSupplier.id, {
-        outstanding_payable: balanceAfter,
+      const payResult = await api.paySupplier(selectedSupplier.id, {
+        amount: amountToPay,
+        payment_method: supPaymentMethod,
+        notes: supPaymentNotes || undefined,
       });
-      const updated = mapSupplier(raw as Record<string, unknown>);
-      setSuppliers(prev => prev.map(s => (s.id === selectedSupplier.id ? { ...s, ...updated, outstandingPayable: balanceAfter } : s)));
+      const paidAmount = Number(payResult.amount_paid ?? amountToPay);
+      const apiBalanceAfter = Number(payResult.balance_after ?? balanceAfter);
+      setSuppliers(prev =>
+        prev.map(s =>
+          s.id === selectedSupplier.id
+            ? { ...s, outstandingPayable: apiBalanceAfter }
+            : s,
+        ),
+      );
+
+      // Keep local PO paid amounts in sync with FIFO server application
+      if (setPurchaseOrders) {
+        let remaining = paidAmount;
+        setPurchaseOrders(prev =>
+          prev.map(po => {
+            if (remaining <= 0) return po;
+            if (po.supplierId !== selectedSupplier.id) return po;
+            if (po.paymentStatus === 'paid') return po;
+            const poBalance = Math.max(0, po.totalAmount - (po.paidAmount || 0));
+            if (poBalance <= 0) return po;
+            const apply = Math.min(remaining, poBalance);
+            remaining -= apply;
+            const newPaid = (po.paidAmount || 0) + apply;
+            const fullyPaid = newPaid >= po.totalAmount - 0.001;
+            return {
+              ...po,
+              paidAmount: newPaid,
+              paymentStatus: fullyPaid ? 'paid' : 'partial',
+            };
+          }),
+        );
+      }
+
+      // Record Supplier Payment Object
+      const paymentRecord: SupplierPayment = {
+        id: `sp-${Date.now()}`,
+        supplierId: selectedSupplier.id,
+        supplierName: selectedSupplier.name,
+        date: nowStr,
+        amount: paidAmount,
+        paymentMethod: supPaymentMethod,
+        referenceNumber: supPaymentRef || `TXN-${Date.now().toString().slice(-6)}`,
+        notes: supPaymentNotes,
+        balanceBefore,
+        balanceAfter: apiBalanceAfter,
+      };
+
+      if (setSupplierPayments) {
+        setSupplierPayments(prev => [paymentRecord, ...prev]);
+      }
+
+      // Generate Voucher
+      const voucher: SettlementVoucher = {
+        type: 'supplier_voucher',
+        voucherNumber,
+        date: nowStr,
+        partyName: selectedSupplier.name,
+        partyType: 'Supplier (Msambazaji)',
+        paymentMode: supPaymentMode,
+        paymentMethod: supPaymentMethod,
+        referenceNumber: supPaymentRef || `REF-${Date.now().toString().slice(-6)}`,
+        amountPaid: paidAmount,
+        balanceBefore,
+        balanceAfter: apiBalanceAfter,
+        cashierName: currentUser?.name ? `${currentUser.name} (Manager/Accountant)` : 'Salum Omar (Owner)',
+        notes: supPaymentNotes || 'Supplier invoice disbursement settled',
+      };
+
+      setIsSupplierModalOpen(false);
+      setActiveVoucher(voucher);
+
+      confetti({
+        particleCount: 50,
+        spread: 70,
+        origin: { y: 0.7 }
+      });
+
+      showToast(
+        isSw ? 'Malipo kwa Msambazaji Yamerekodiwa!' : 'Supplier Disbursement Recorded!',
+        `${formatTSh(paidAmount)} disbursed to ${selectedSupplier.name}. Remaining Payable: ${formatTSh(apiBalanceAfter)}.`
+      );
     } catch (err) {
       alert((err as Error).message || (isSw ? 'Imeshindwa kuhifadhi malipo ya msambazaji.' : 'Failed to save supplier payment.'));
-      setIsSavingSettlement(false);
-      return;
     } finally {
       setIsSavingSettlement(false);
     }
-
-    // 2. Update linked Purchase Orders if any
-    if (setPurchaseOrders) {
-      setPurchaseOrders(prev => prev.map(po => {
-        if (po.supplierId === selectedSupplier.id && (po.paymentStatus === 'credit' || po.paymentStatus === 'partial')) {
-          const poBalance = po.totalAmount - (po.paidAmount || 0);
-          if (poBalance > 0 && balanceAfter === 0) {
-            return {
-              ...po,
-              paidAmount: po.totalAmount,
-              paymentStatus: 'paid',
-            };
-          }
-        }
-        return po;
-      }));
-    }
-
-    // 3. Record Supplier Payment Object
-    const paymentRecord: SupplierPayment = {
-      id: `sp-${Date.now()}`,
-      supplierId: selectedSupplier.id,
-      supplierName: selectedSupplier.name,
-      date: nowStr,
-      amount: amountToPay,
-      paymentMethod: supPaymentMethod,
-      referenceNumber: supPaymentRef || `TXN-${Date.now().toString().slice(-6)}`,
-      notes: supPaymentNotes,
-      balanceBefore,
-      balanceAfter,
-    };
-
-    if (setSupplierPayments) {
-      setSupplierPayments(prev => [paymentRecord, ...prev]);
-    }
-
-    // 4. Generate Voucher
-    const voucher: SettlementVoucher = {
-      type: 'supplier_voucher',
-      voucherNumber,
-      date: nowStr,
-      partyName: selectedSupplier.name,
-      partyType: 'Supplier (Msambazaji)',
-      paymentMode: supPaymentMode,
-      paymentMethod: supPaymentMethod,
-      referenceNumber: supPaymentRef || `REF-${Date.now().toString().slice(-6)}`,
-      amountPaid: amountToPay,
-      balanceBefore,
-      balanceAfter,
-      cashierName: currentUser?.name ? `${currentUser.name} (Manager/Accountant)` : 'Salum Omar (Owner)',
-      notes: supPaymentNotes || 'Supplier invoice disbursement settled',
-    };
-
-    setIsSupplierModalOpen(false);
-    setActiveVoucher(voucher);
-
-    confetti({
-      particleCount: 50,
-      spread: 70,
-      origin: { y: 0.7 }
-    });
-
-    showToast(
-      isSw ? 'Malipo kwa Msambazaji Yamerekodiwa!' : 'Supplier Disbursement Recorded!',
-      `${formatTSh(amountToPay)} disbursed to ${selectedSupplier.name}. Remaining Payable: ${formatTSh(balanceAfter)}.`
-    );
   };
 
   // Dispatch SMS Acknowledgment
