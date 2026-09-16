@@ -100,6 +100,7 @@ import { AIChatbotDrawer } from '@/components/v1/AIChatbotDrawer';
 import { WorkplaceView } from '@/components/v1/WorkplaceView';
 import confetti from 'canvas-confetti';
 import { api } from '@/lib/api';
+import { useSaasPlans } from '@/context/SaasPlansContext';
 import { mapApiUserToAuthUser, tryRestoreSession, persistAuthUser } from '@/lib/authBridge';
 import { syncTenantFromApi, syncAdminFromApi, saleToApiPayload, fetchDashboardStats, fetchProductsFromApi, fetchCustomersFromApi, mergeCustomersFromApi, mapSupplier, scopeSnapshotByBranch, resolveDefaultBranchId, filterByBranchId, type DashboardStats, type ApiSyncResult } from '@/lib/apiSync';
 import { enforceSaleDueDate } from '@/lib/dueDate';
@@ -176,6 +177,7 @@ const VENDOR_ROUTE_TABS = [
 
 export default function DukaPortal() {
   // Global Application View & Authentication State
+  const { refreshPlans } = useSaasPlans();
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [activeTab, setActiveTab] = useState<string>('landing');
   const [language, setLanguage] = useState<Language>('sw'); // Default Swahili for Tanzania
@@ -503,6 +505,7 @@ export default function DukaPortal() {
         if (result.user.businessName) setBusinessName(result.user.businessName);
         initBranchContextFromUser(result.user);
         setActiveTab(result.user.role === 'super_admin' ? 'super-dashboard' : 'dashboard');
+        void refreshPlans();
 
         const tid = result.user.businessId || result.user.id || 'local';
         const restoreBranchId =
@@ -616,6 +619,7 @@ export default function DukaPortal() {
     setUserRole(user.role);
     if (user.businessType) setBusinessType(user.businessType);
     if (user.businessName) setBusinessName(user.businessName);
+    void refreshPlans();
 
     if (user.role === 'super_admin') {
       setActiveTab('super-dashboard');

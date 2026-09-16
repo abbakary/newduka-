@@ -280,7 +280,7 @@ export const PublicRegisterWizardView: React.FC<PublicRegisterWizardViewProps> =
                   : 'All packages include the same features — choose by branches you need (1, 2, or 3).'}
               </p>
               <div className="space-y-3">
-                {plans.map(plan => (
+                {plans.filter(plan => Boolean(plan?.id)).map(plan => (
                   <button
                     key={plan.id}
                     type="button"

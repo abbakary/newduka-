@@ -333,7 +333,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               : 'Transparent pricing — every package includes the same features. Only branch count and price differ (1, 2, or 3 branches).'}
           </p>
           <div className="mt-12 grid md:grid-cols-3 gap-6">
-            {plans.map(plan => (
+            {plans.filter(plan => Boolean(plan?.id)).map(plan => (
               <div
                 key={plan.id}
                 className={`rounded-2xl border p-6 flex flex-col ${plan.popular ? 'border-teal-500 shadow-lg ring-1 ring-teal-500/20 relative' : 'border-slate-200'}`}

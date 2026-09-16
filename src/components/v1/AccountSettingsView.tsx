@@ -56,7 +56,7 @@ import { BrandThemePanel } from '@/components/v1/BrandThemePanel';
 import { SettingsSectionNav } from '@/components/v1/SettingsSectionNav';
 import { canManageStaffRBAC } from '@/lib/rbac';
 import { useSaasPlans } from '@/context/SaasPlansContext';
-import { derivePaymentStatus, formatPlanPrice, paymentStatusLabel, paymentStatusTone, planBranchLabel, planPeriod } from '@/lib/saasPlans';
+import { DEFAULT_PUBLIC_PLANS, derivePaymentStatus, formatPlanPrice, paymentStatusLabel, paymentStatusTone, planBranchLabel, planPeriod } from '@/lib/saasPlans';
 import type { SaaSPlanTier } from '@/types/v1';
 import confetti from 'canvas-confetti';
 
@@ -101,7 +101,8 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 }) => {
   const isSw = language === 'sw';
   const { plans } = useSaasPlans();
-  const activePlan = plans.find(p => p.tier === currentPlanTier) ?? plans[0];
+  const catalog = (plans.length ? plans : DEFAULT_PUBLIC_PLANS).filter((p): p is NonNullable<typeof p> => Boolean(p?.id));
+  const activePlan = catalog.find(p => p.tier === currentPlanTier) ?? catalog[0] ?? DEFAULT_PUBLIC_PLANS[0];
   const paymentStatus = derivePaymentStatus(subscriptionExpiry, 'active');
   const canManageTeam = canManageStaffRBAC(currentUser);
   const [activeTab, setActiveTab] = useState<'profile' | 'branding' | 'team' | 'branches' | 'compliance' | 'documents' | 'billing'>('profile');
@@ -980,7 +981,7 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
               </p>
             </div>
             <div className="grid sm:grid-cols-3 gap-3">
-              {plans.map(plan => {
+              {catalog.map(plan => {
                 const isCurrent = plan.tier === currentPlanTier;
                 return (
                   <div

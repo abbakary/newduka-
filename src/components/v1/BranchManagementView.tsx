@@ -157,7 +157,8 @@ export const BranchManagementView: React.FC<BranchManagementViewProps> = ({
   const { plans: saasPlans } = useSaasPlans();
 
   // Selected plan lookup
-  const currentPlan = saasPlans.find(p => p.tier === currentPlanTier) || saasPlans[0] || DEFAULT_SAAS_PLANS[0];
+  const planCatalog = (saasPlans.length ? saasPlans : DEFAULT_SAAS_PLANS).filter(p => Boolean(p?.id));
+  const currentPlan = planCatalog.find(p => p.tier === currentPlanTier) || planCatalog[0] || DEFAULT_SAAS_PLANS[0];
   const maxBranchesAllowed = currentPlan.maxBranches;
   const isBranchQuotaReached = branches.length >= maxBranchesAllowed;
   const canCreateBranches = currentUser?.role === 'vendor_owner' || currentUser?.staffRole === 'Owner';
@@ -1055,7 +1056,7 @@ export const BranchManagementView: React.FC<BranchManagementViewProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {saasPlans.map(plan => {
+              {planCatalog.map(plan => {
                 const isCurrent = plan.tier === currentPlanTier;
                 const isPro = plan.tier === 'biashara_pro';
 
@@ -1613,7 +1614,7 @@ export const BranchManagementView: React.FC<BranchManagementViewProps> = ({
             </div>
 
             <div className="space-y-3">
-              {saasPlans.filter(plan => plan.maxBranches > currentPlan.maxBranches).map(plan => {
+              {planCatalog.filter(plan => plan.maxBranches > currentPlan.maxBranches).map(plan => {
                 const isSelected = currentPlanTier === plan.tier;
                 const isEnterprise = plan.tier === 'enterprise_chain';
                 return (

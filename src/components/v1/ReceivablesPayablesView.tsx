@@ -152,10 +152,12 @@ export const ReceivablesPayablesView: React.FC<ReceivablesPayablesViewProps> = (
 
   const branchSuppliers = useMemo(() => {
     if (!activeBranchId || activeBranchId === 'all') return suppliers;
-    return suppliers.map(s => ({
-      ...s,
-      outstandingPayable: branchPayablesBySupplier.get(s.id) ?? 0,
-    }));
+    return suppliers.map(s => {
+      const fromPos = branchPayablesBySupplier.get(s.id) ?? 0;
+      const fromApi = s.outstandingPayable ?? 0;
+      const owed = fromPos > 0 && fromApi < fromPos ? fromApi : (fromPos > 0 ? fromPos : fromApi);
+      return { ...s, outstandingPayable: owed };
+    });
   }, [suppliers, branchPayablesBySupplier, activeBranchId]);
 
   const [activeTab, setActiveTab] = useState<'receivables' | 'payables' | 'history'>(initialTab);

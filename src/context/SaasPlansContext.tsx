@@ -1,6 +1,14 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/api';
-import { PublicPlan, DEFAULT_PUBLIC_PLANS, loadPublicPlans, savePublicPlans, mapApiPlan, mapApiPlanToPatch } from '@/lib/saasPlans';
+import { loadCachedAuthUser } from '@/lib/authBridge';
+import {
+  PublicPlan,
+  DEFAULT_PUBLIC_PLANS,
+  loadPublicPlans,
+  savePublicPlans,
+  mapApiPlans,
+  mapApiPlanToPatch,
+} from '@/lib/saasPlans';
 
 interface SaasPlansContextValue {
   plans: PublicPlan[];
@@ -14,22 +22,33 @@ interface SaasPlansContextValue {
 
 const SaasPlansContext = createContext<SaasPlansContextValue | null>(null);
 
+function isSuperAdminSession(): boolean {
+  return loadCachedAuthUser()?.role === 'super_admin';
+}
+
 export const SaasPlansProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [plans, setPlans] = useState<PublicPlan[]>(() => loadPublicPlans());
   const [loading, setLoading] = useState(true);
 
   const refreshPlans = useCallback(async () => {
     try {
-      let raw: Array<Record<string, unknown>>;
-      try {
-        raw = await api.getAdminPlans() as Array<Record<string, unknown>>;
-      } catch {
-        raw = await api.getPublicPlans() as Array<Record<string, unknown>>;
+      let next: PublicPlan[] = [];
+      // Only super_admin may call /admin/plans — everyone else uses public catalog
+      // to avoid noisy 403s and broken pricing pages for tenant users.
+      if (isSuperAdminSession()) {
+        try {
+          next = mapApiPlans(await api.getAdminPlans());
+        } catch {
+          next = mapApiPlans(await api.getPublicPlans());
+        }
+      } else {
+        next = mapApiPlans(await api.getPublicPlans());
       }
-      const next = raw.map(mapApiPlan);
       if (next.length) {
         setPlans(next);
         savePublicPlans(next);
+      } else {
+        setPlans(loadPublicPlans());
       }
     } catch {
       setPlans(loadPublicPlans());
@@ -43,15 +62,15 @@ export const SaasPlansProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [refreshPlans]);
 
   const updatePlans = useCallback((next: PublicPlan[]) => {
-    setPlans(next);
-    savePublicPlans(next);
+    const safe = next.filter((p): p is PublicPlan => Boolean(p?.id));
+    setPlans(safe.length ? safe : DEFAULT_PUBLIC_PLANS);
+    savePublicPlans(safe.length ? safe : DEFAULT_PUBLIC_PLANS);
   }, []);
 
   const updatePlan = useCallback(async (id: string, patch: Partial<PublicPlan>, isSw?: boolean) => {
     try {
-      const updated = await api.updateAdminPlan(id, mapApiPlanToPatch(patch, isSw));
+      await api.updateAdminPlan(id, mapApiPlanToPatch(patch, isSw));
       await refreshPlans();
-      return updated;
     } catch {
       setPlans(prev => {
         const next = prev.map(p => (p.id === id ? { ...p, ...patch } : p));
@@ -63,10 +82,11 @@ export const SaasPlansProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const syncSharedFeatures = useCallback(async (features: string[], featuresSw: string[]) => {
     try {
-      const raw = await api.syncAdminPlanFeatures({ features, features_sw: featuresSw });
-      const next = (raw as Array<Record<string, unknown>>).map(mapApiPlan);
-      setPlans(next);
-      savePublicPlans(next);
+      const next = mapApiPlans(await api.syncAdminPlanFeatures({ features, features_sw: featuresSw }));
+      if (next.length) {
+        setPlans(next);
+        savePublicPlans(next);
+      }
     } catch {
       setPlans(prev => {
         const next = prev.map(p => ({ ...p, features, featuresSw }));
@@ -78,10 +98,10 @@ export const SaasPlansProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const resetPlans = useCallback(async () => {
     try {
-      const raw = await api.resetAdminPlans();
-      const next = (raw as Array<Record<string, unknown>>).map(mapApiPlan);
-      setPlans(next);
-      savePublicPlans(next);
+      const next = mapApiPlans(await api.resetAdminPlans());
+      const safe = next.length ? next : DEFAULT_PUBLIC_PLANS;
+      setPlans(safe);
+      savePublicPlans(safe);
     } catch {
       setPlans(DEFAULT_PUBLIC_PLANS);
       savePublicPlans(DEFAULT_PUBLIC_PLANS);

@@ -262,7 +262,23 @@ class ApiClient {
       balance_before: number;
       balance_after: number;
       updated_po_ids: string[];
-    }>(`/suppliers/${id}/pay`, { method: 'POST', body: JSON.stringify(data) });
+    }>(`/suppliers/${id}/pay`, { method: 'POST', body: JSON.stringify(data) }).catch(async (err: Error) => {
+      const msg = (err.message || '').toLowerCase();
+      if (!msg.includes('not found') && !msg.includes('404')) throw err;
+      // Legacy backend without /pay — reduce outstanding via PATCH (also settles POs after deploy).
+      const list = await this.getSuppliers();
+      const current = list.find(s => String(s.id) === id);
+      const before = Number(current?.outstanding_payable ?? 0);
+      const after = Math.max(0, before - Number(data.amount || 0));
+      const updated = await this.updateSupplier(id, { outstanding_payable: after }) as Record<string, unknown>;
+      return {
+        supplier_id: id,
+        amount_paid: Number(data.amount || 0),
+        balance_before: before,
+        balance_after: Number(updated.outstanding_payable ?? after),
+        updated_po_ids: [] as string[],
+      };
+    });
   }
   getBranches() { return this.request<Array<Record<string, unknown>>>('/branches'); }
   createBranch(data: Record<string, unknown>) {

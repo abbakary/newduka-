@@ -18,8 +18,17 @@ export function loadPublicPlans(): PublicPlan[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_PUBLIC_PLANS;
-    const parsed = JSON.parse(raw) as PublicPlan[];
-    const cleaned = parsed.filter(p => p.tier !== 'free_starter');
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return DEFAULT_PUBLIC_PLANS;
+    const cleaned = parsed
+      .filter((p): p is PublicPlan => Boolean(p && typeof p === 'object' && p.tier && p.tier !== 'free_starter' && p.id))
+      .map(p => ({
+        ...p,
+        name: String(p.name ?? ''),
+        nameSw: String(p.nameSw ?? p.name ?? ''),
+        features: Array.isArray(p.features) ? p.features : [],
+        featuresSw: Array.isArray(p.featuresSw) ? p.featuresSw : [],
+      }));
     return cleaned.length ? cleaned : DEFAULT_PUBLIC_PLANS;
   } catch {
     return DEFAULT_PUBLIC_PLANS;
@@ -27,29 +36,54 @@ export function loadPublicPlans(): PublicPlan[] {
 }
 
 export function savePublicPlans(plans: PublicPlan[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+  const safe = plans.filter((p): p is PublicPlan => Boolean(p && p.id));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(safe.length ? safe : DEFAULT_PUBLIC_PLANS));
 }
 
-export function mapApiPlan(raw: Record<string, unknown>): PublicPlan {
+/** Normalize API / wrapped payloads into plan objects. */
+export function unwrapPlansPayload(raw: unknown): Record<string, unknown>[] {
+  if (Array.isArray(raw)) {
+    return raw.filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'));
+  }
+  if (raw && typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    const nested = obj.items ?? obj.plans ?? obj.data;
+    if (Array.isArray(nested)) {
+      return nested.filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'));
+    }
+  }
+  return [];
+}
+
+export function mapApiPlan(raw: Record<string, unknown> | null | undefined): PublicPlan | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const id = raw.id != null ? String(raw.id) : '';
+  if (!id) return null;
   const tier = raw.tier === 'free_starter' ? 'starter' : (raw.tier as PublicPlan['tier']);
   return {
-    id: String(raw.id),
-    tier,
-    name: String(raw.name),
-    nameSw: String(raw.name_sw ?? raw.name),
+    id,
+    tier: tier || 'starter',
+    name: String(raw.name ?? ''),
+    nameSw: String(raw.name_sw ?? raw.name ?? ''),
     priceMonthlyTzs: Number(raw.price_monthly_tzs ?? 0),
     priceYearlyTzs: Number(raw.price_yearly_tzs ?? 0),
     maxBranches: Number(raw.max_branches ?? 1),
     maxStaff: Number(raw.max_staff ?? 3),
     maxProducts: Number(raw.max_products ?? 500),
-    features: (raw.features as string[]) ?? [],
-    featuresSw: (raw.features_sw as string[]) ?? [],
+    features: Array.isArray(raw.features) ? (raw.features as string[]) : [],
+    featuresSw: Array.isArray(raw.features_sw) ? (raw.features_sw as string[]) : [],
     tagEn: String(raw.tag_en ?? ''),
     tagSw: String(raw.tag_sw ?? ''),
     contactUs: Boolean(raw.contact_us),
     popular: Boolean(raw.popular),
     activeSubscribersCount: Number(raw.active_subscribers_count ?? 0),
   };
+}
+
+export function mapApiPlans(raw: unknown): PublicPlan[] {
+  return unwrapPlansPayload(raw)
+    .map(mapApiPlan)
+    .filter((p): p is PublicPlan => Boolean(p?.id));
 }
 
 export function mapApiPlanToPatch(patch: Partial<PublicPlan>, isSw?: boolean): Record<string, unknown> {
