@@ -31,19 +31,24 @@ body {
   background: var(--color-surface);
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-#root { min-height: 100dvh; }
+#root {
+  min-height: 100dvh;
+  min-width: 0;
+  overflow-x: hidden;
+}
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .sidebar-desktop { display: none !important; }
   .bottom-nav { display: flex !important; }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1024px) {
   .bottom-nav { display: none !important; }
 }
 

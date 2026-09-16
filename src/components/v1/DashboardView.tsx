@@ -572,7 +572,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               isSw={isSw}
               variant="owner"
               onClick={() => onNavigate('reports')}
-              className="w-full lg:w-[min(420px,34%)] lg:min-w-[320px] shrink-0 order-1 lg:order-2 min-h-[280px] lg:min-h-[300px] lg:self-stretch"
+              className="w-full lg:w-[min(420px,34%)] shrink-0 order-1 lg:order-2 min-h-[240px] sm:min-h-[280px] lg:min-h-[300px] lg:self-stretch"
             />
           </div>
           </div>

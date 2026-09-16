@@ -50,6 +50,7 @@ import {
 } from '@/lib/emptyDefaults';
 import { Sidebar } from '@/components/v1/Sidebar';
 import { SuperAdminSidebar } from '@/components/v1/SuperAdminSidebar';
+import { MobileBottomNav } from '@/components/v1/MobileBottomNav';
 import { ModuleHubView } from '@/components/v1/ModuleHubView';
 import { ModuleContextBar } from '@/components/v1/ModuleContextBar';
 import { Header } from '@/components/v1/Header';
@@ -191,6 +192,7 @@ export default function DukaPortal() {
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(0);
   const [isAIChatOpen, setIsAIChatOpen] = useState<boolean>(false);
   const [aiInitialPrompt, setAiInitialPrompt] = useState<string | undefined>(undefined);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Super Admin / Provider specific state
   const [tenants, setTenants] = useState<TenantStore[]>(EMPTY_TENANTS);
@@ -340,6 +342,20 @@ export default function DukaPortal() {
       setPendingSyncCount(saved.length);
     }
   }, [tenantStorageId]);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const prev = document.body.style.overflow;
+    if (sidebarOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = prev || '';
+    return () => {
+      document.body.style.overflow = prev || '';
+    };
+  }, [sidebarOpen]);
 
   const enqueueSyncItem = (item: Record<string, unknown>) => {
     setPendingSyncQueue(prev => {
@@ -1304,10 +1320,9 @@ export default function DukaPortal() {
       tenantId={currentUser?.businessId || currentUser?.id}
       businessName={businessName || currentUser?.businessName}
     >
-    <div className={`flex h-screen overflow-hidden font-sans ${isSuperAdminMode ? 'bg-[#F9F9F7] text-[#003322]' : 'bg-[#f0f2f5] text-[#323130]'}`}>
-      {/* 1. Left Sidebar */}
+    <div className={`flex h-dvh overflow-hidden font-sans ${isSuperAdminMode ? 'bg-[#F9F9F7] text-[#003322]' : 'bg-[#f0f2f5] text-[#323130]'}`}>
+      {/* 1. Left Sidebar — drawer on mobile, persistent on lg+ */}
       {isSuperAdminMode ? (
-        <div className="shrink-0 flex items-stretch p-3 pr-2 z-30">
         <SuperAdminSidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -1315,6 +1330,8 @@ export default function DukaPortal() {
           tenantsCount={tenants.length}
           pendingApprovalsCount={applications.filter(a => a.status === 'pending').length}
           unpaidCount={providerUnpaidCount}
+          mobileOpen={sidebarOpen}
+          onMobileClose={() => setSidebarOpen(false)}
           onGoToLanding={() => {
             setActiveTab('landing');
           }}
@@ -1324,7 +1341,6 @@ export default function DukaPortal() {
           }}
           onLogout={handleLogout}
         />
-        </div>
       ) : (
         <Sidebar
           currentView={activeTab}
@@ -1338,10 +1354,6 @@ export default function DukaPortal() {
           businessName={businessName}
           lowStockCount={lowStockCount}
           overdueCreditCount={overdueCreditCount}
-          customersCount={customers.length}
-          upcomingEventsCount={upcomingEventsCount}
-          pendingApprovalsCount={applications.filter(a => a.status === 'pending').length}
-          branchesCount={branches.length}
           isOnline={isOnline}
           currentUser={currentUser}
           staffRole={currentUser?.staffRole}
@@ -1350,11 +1362,13 @@ export default function DukaPortal() {
             branches[0]?.name
           }
           onLogout={handleLogout}
+          mobileOpen={sidebarOpen}
+          onMobileClose={() => setSidebarOpen(false)}
         />
       )}
 
       {/* 2. Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0 w-full">
         {/* Top Header */}
         <Header
           language={language}
@@ -1383,6 +1397,7 @@ export default function DukaPortal() {
           onExitImpersonation={handleExitImpersonation}
           tenantsList={tenants}
           onSelectTenantToImpersonate={handleImpersonateTenant}
+          onToggleSidebar={() => setSidebarOpen(open => !open)}
         />
 
         {(offlineNotice || (!isOnline && currentUser)) && (
@@ -1413,8 +1428,8 @@ export default function DukaPortal() {
 
         {/* Scrollable View Container */}
         {/* Avoid backdrop-filter/transform here — they trap position:fixed modals inside the scroll pane. */}
-        <main className={`flex-1 overflow-y-auto p-4 md:p-6 rounded-2xl shadow-sm ${isSuperAdminMode ? 'bg-[#F9F9F7] border border-[#003322]/10' : 'bg-white border border-[#E1DFDD]/80'}`}>
-          <div className="max-w-7xl mx-auto">
+        <main className={`flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-6 rounded-none sm:rounded-2xl shadow-sm pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-6 ${isSuperAdminMode ? 'bg-[#F9F9F7] border border-[#003322]/10' : 'bg-white border border-[#E1DFDD]/80'}`}>
+          <div className="max-w-7xl mx-auto w-full min-w-0">
             {!isSuperAdminMode && (
               <ModuleContextBar
                 activeTab={activeTab}
@@ -1901,6 +1916,17 @@ export default function DukaPortal() {
           </div>
         </main>
       </div>
+
+      {!isSuperAdminMode && currentUser && !['landing', 'login', 'register'].includes(activeTab) && (
+        <MobileBottomNav
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          language={language}
+          businessType={businessType}
+          currentUser={currentUser}
+          lowStockCount={lowStockCount}
+        />
+      )}
 
       {/* Floating AI Assistant Chatbot Drawer */}
       <AIChatbotDrawer

@@ -1990,6 +1990,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       {/* ================= MODAL: EDIT PRODUCT ================= */}
       <ModalPortal open={Boolean(editingProduct && editForm)} onClose={() => { setEditingProduct(null); setEditForm(null); }}>
+          {editingProduct && editForm ? (
           <form
             onSubmit={handleSaveEdit}
             className="bg-white rounded-2xl max-w-2xl w-full border border-[#E1DFDD] shadow-2xl flex flex-col max-h-[min(92dvh,860px)] overflow-hidden"
@@ -2190,6 +2191,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               </button>
             </div>
           </form>
+          ) : null}
       </ModalPortal>
     </div>
   );
