@@ -2,22 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { 
   QrCode, 
   Printer, 
-  Download, 
   X, 
   Copy, 
   Check, 
-  Tag, 
   Layers, 
   Sparkles,
   ShieldCheck,
-  Calendar,
-  Package
+  Barcode,
 } from 'lucide-react';
 import { Product, Language } from '@/types/v1';
-import { formatTSh, getTranslation } from '@/utils/translations';
+import { formatTSh } from '@/utils/translations';
 import { generateProductQRCodeDataUrl, getProductQRPayloadString } from '@/utils/qrGenerator';
+import {
+  generateProductBarcodeDataUrl,
+  downloadDataUrl,
+  getProductBarcodeValue,
+} from '@/lib/barcodeGenerator';
 import { printHtmlPage } from '@/lib/documentRenderer';
 import { qrLabelsPrintHtml } from '@/lib/documentDataMappers';
+import { api } from '@/lib/api';
 
 interface QRCodeModalProps {
   isOpen: boolean;
@@ -36,17 +39,45 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
 }) => {
   const isSw = language === 'sw';
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
-  const [batchDataUrls, setBatchDataUrls] = useState<{ product: Product; url: string }[]>([]);
+  const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
+  const [barcodeValue, setBarcodeValue] = useState<string>('');
+  const [batchDataUrls, setBatchDataUrls] = useState<
+    { product: Product; qrUrl: string; barcodeUrl: string }[]
+  >([]);
   const [mode, setMode] = useState<'single' | 'batch'>('single');
   const [labelSize, setLabelSize] = useState<'thermal_small' | 'thermal_medium' | 'a4_sheet'>('thermal_medium');
   const [copied, setCopied] = useState(false);
   const [isGeneratingBatch, setIsGeneratingBatch] = useState(false);
 
-  // Generate single QR code
+  // Generate single QR + Code128 (client); optionally refresh from API when online
   useEffect(() => {
-    if (product) {
-      generateProductQRCodeDataUrl(product, 320).then(url => setQrDataUrl(url));
+    if (!product) return;
+    let cancelled = false;
+    setBarcodeValue(getProductBarcodeValue(product));
+    generateProductQRCodeDataUrl(product, 320).then(url => {
+      if (!cancelled) setQrDataUrl(url);
+    });
+    try {
+      setBarcodeDataUrl(generateProductBarcodeDataUrl(product, 72));
+    } catch {
+      setBarcodeDataUrl('');
     }
+    void api
+      .getProductScanLabels(product.id)
+      .then(res => {
+        if (cancelled || !res) return;
+        if (res.qr_png_base64) {
+          setQrDataUrl(`data:image/png;base64,${res.qr_png_base64}`);
+        }
+        if (res.barcode_png_base64) {
+          setBarcodeDataUrl(`data:image/png;base64,${res.barcode_png_base64}`);
+        }
+        if (res.barcode_value) setBarcodeValue(res.barcode_value);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, [product]);
 
   // Generate batch QR codes when switched to batch mode
@@ -56,7 +87,14 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
       Promise.all(
         allProducts.map(async p => ({
           product: p,
-          url: await generateProductQRCodeDataUrl(p, 200),
+          qrUrl: await generateProductQRCodeDataUrl(p, 200),
+          barcodeUrl: (() => {
+            try {
+              return generateProductBarcodeDataUrl(p, 56);
+            } catch {
+              return '';
+            }
+          })(),
         }))
       ).then(res => {
         setBatchDataUrls(res);
@@ -84,6 +122,8 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
           sku: product.sku,
           price: product.price,
           qrDataUrl,
+          barcodeDataUrl: barcodeDataUrl || undefined,
+          barcodeValue: barcodeValue || undefined,
         }], isSw),
         isSw,
       );
@@ -93,11 +133,19 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
       printHtmlPage(
         isSw ? 'Lebo za QR' : 'QR Labels',
         qrLabelsPrintHtml(
-          batchDataUrls.map(({ product: p, url }) => ({
+          batchDataUrls.map(({ product: p, qrUrl, barcodeUrl }) => ({
             name: p.name,
             sku: p.sku,
             price: p.price,
-            qrDataUrl: url,
+            qrDataUrl: qrUrl,
+            barcodeDataUrl: barcodeUrl || undefined,
+            barcodeValue: (() => {
+              try {
+                return getProductBarcodeValue(p);
+              } catch {
+                return undefined;
+              }
+            })(),
           })),
           isSw,
         ),
@@ -106,12 +154,17 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
     }
   };
 
+  const safeFileStem = (p: Product) =>
+    `${p.sku}_${p.name.replace(/\s+/g, '_').replace(/[^\w-]/g, '')}`;
+
   const handleDownloadSingle = () => {
     if (!qrDataUrl || !product) return;
-    const a = document.createElement('a');
-    a.href = qrDataUrl;
-    a.download = `QR_${product.sku}_${product.name.replace(/\s+/g, '_')}.png`;
-    a.click();
+    downloadDataUrl(qrDataUrl, `QR_${safeFileStem(product)}.png`);
+  };
+
+  const handleDownloadBarcode = () => {
+    if (!barcodeDataUrl || !product) return;
+    downloadDataUrl(barcodeDataUrl, `Barcode_${safeFileStem(product)}.png`);
   };
 
   return (
@@ -125,7 +178,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-base text-white">
-                {isSw ? 'Msimbo wa QR & Lebo ya Bidhaa' : 'Product QR Code & Smart Shelf Tag'}
+                {isSw ? 'QR, Barcode (USB) & Lebo' : 'QR, USB Barcode & Shelf Labels'}
               </h3>
               <p className="text-xs text-slate-300">
                 {mode === 'single' && product
@@ -200,17 +253,31 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                   SKU: {product.sku}
                 </div>
 
-                <div className="my-2.5 p-2 bg-white rounded-lg border border-[#EDEBE9] shadow-2xs">
+                <div className="my-2.5 p-2 bg-white rounded-lg border border-[#EDEBE9] shadow-2xs w-full space-y-2">
                   {qrDataUrl ? (
                     <img
                       src={qrDataUrl}
                       alt={`QR Code for ${product.name}`}
-                      className="w-36 h-36 object-contain"
+                      className="w-36 h-36 object-contain mx-auto"
                     />
                   ) : (
-                    <div className="w-36 h-36 bg-slate-100 animate-pulse flex items-center justify-center text-xs text-slate-400">
+                    <div className="w-36 h-36 bg-slate-100 animate-pulse flex items-center justify-center text-xs text-slate-400 mx-auto">
                       Generating...
                     </div>
+                  )}
+                  {barcodeDataUrl ? (
+                    <img
+                      src={barcodeDataUrl}
+                      alt={`Barcode for ${product.name}`}
+                      className="w-full max-h-16 object-contain"
+                    />
+                  ) : (
+                    <div className="h-12 bg-slate-50 rounded flex items-center justify-center text-[10px] text-slate-400">
+                      {isSw ? 'Barcode…' : 'Barcode…'}
+                    </div>
+                  )}
+                  {barcodeValue && (
+                    <div className="text-[10px] font-mono text-[#605E5C]">{barcodeValue}</div>
                   )}
                 </div>
 
@@ -256,30 +323,39 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                 <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl space-y-1.5 text-indigo-900">
                   <div className="font-bold flex items-center gap-1.5 text-xs text-indigo-950">
                     <Sparkles className="w-4 h-4 text-indigo-600" />
-                    <span>{isSw ? 'Urahisi wa Mauzo (POS Instant Scan)' : 'POS Instant QR Barcode Scanning'}</span>
+                    <span>{isSw ? 'POS: Kamera, USB 1D, na QR' : 'POS: camera, USB 1D wedge, and QR'}</span>
                   </div>
                   <p className="text-[11px] text-indigo-800 leading-relaxed">
                     {isSw
-                      ? 'Lebo salama: QR ina SKU pekee (DUKA+SKU:…). Bei na jina hazionyeshwi ukiskani nje ya POS — POS inatafuta bidhaa kwenye stoo yako.'
-                      : 'Secure label: QR encodes SKU only (DUKA+SKU:…). Price and name are not exposed if scanned outside POS — POS looks up the item in your catalog.'}
+                      ? 'QR salama (DUKA+SKU:…). Mstari wa chini ni Code128 kwa skana ya USB — thamani ni barcode au SKU.'
+                      : 'Secure QR (DUKA+SKU:…). Code128 line is for USB scanners — value is product barcode or SKU.'}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 pt-2">
+                <div className="flex flex-wrap items-center gap-2 pt-2">
                   <button
                     onClick={handleCopyPayload}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-[#E1DFDD] bg-white text-[#323130] font-semibold hover:bg-[#F3F2F1] transition-all cursor-pointer"
+                    className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-[#E1DFDD] bg-white text-[#323130] font-semibold hover:bg-[#F3F2F1] transition-all cursor-pointer"
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-[#107C10]" /> : <Copy className="w-3.5 h-3.5 text-[#605E5C]" />}
-                    <span>{copied ? (isSw ? 'Imenakiliwa!' : 'Copied!') : (isSw ? 'Nakili Data ya QR' : 'Copy QR Payload')}</span>
+                    <span>{copied ? (isSw ? 'Imenakiliwa!' : 'Copied!') : (isSw ? 'Nakili QR' : 'Copy QR')}</span>
                   </button>
 
                   <button
                     onClick={handleDownloadSingle}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-[#E1DFDD] bg-white text-[#323130] font-semibold hover:bg-[#F3F2F1] transition-all cursor-pointer"
+                    className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-[#E1DFDD] bg-white text-[#323130] font-semibold hover:bg-[#F3F2F1] transition-all cursor-pointer"
                   >
-                    <Download className="w-3.5 h-3.5 text-[#0078D4]" />
-                    <span>{isSw ? 'Pakua Picha ya PNG' : 'Download PNG'}</span>
+                    <QrCode className="w-3.5 h-3.5 text-[#0078D4]" />
+                    <span>{isSw ? 'Pakua QR' : 'Download QR'}</span>
+                  </button>
+
+                  <button
+                    onClick={handleDownloadBarcode}
+                    disabled={!barcodeDataUrl}
+                    className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-[#E1DFDD] bg-white text-[#323130] font-semibold hover:bg-[#F3F2F1] transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Barcode className="w-3.5 h-3.5 text-[#6264A7]" />
+                    <span>{isSw ? 'Pakua Barcode' : 'Download Barcode'}</span>
                   </button>
                 </div>
               </div>
@@ -300,7 +376,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[380px] overflow-y-auto p-2 bg-[#FAF9F8] rounded-xl border border-[#EDEBE9]">
-                  {batchDataUrls.map(({ product: p, url }) => (
+                  {batchDataUrls.map(({ product: p, qrUrl, barcodeUrl }) => (
                     <div
                       key={p.id}
                       className="p-2.5 bg-white rounded-lg border border-[#E1DFDD] shadow-2xs flex flex-col items-center text-center"
@@ -311,7 +387,10 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       <div className="text-[10px] font-mono text-[#0078D4] truncate w-full">
                         {p.sku}
                       </div>
-                      <img src={url} alt={p.name} className="w-20 h-20 my-1 object-contain" />
+                      <img src={qrUrl} alt={p.name} className="w-20 h-20 my-1 object-contain" />
+                      {barcodeUrl ? (
+                        <img src={barcodeUrl} alt="" className="w-full max-h-8 object-contain" />
+                      ) : null}
                       <div className="font-bold text-xs text-[#107C10]">
                         {formatTSh(p.price)}
                       </div>

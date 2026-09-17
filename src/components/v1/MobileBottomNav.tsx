@@ -39,7 +39,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       className="bottom-nav fixed bottom-0 left-0 right-0 z-40 bg-white/95 border-t border-[#E1DFDD]"
       aria-label={language === 'sw' ? 'Menyu ya chini' : 'Bottom navigation'}
     >
-      <div className="flex justify-around items-stretch px-1 pt-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))]">
+      <div className="grid grid-cols-5 w-full gap-0 px-1 sm:px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {primary.map(mod => {
           const active = isActive(mod);
           const Icon = mod.icon;
@@ -49,8 +49,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               key={mod.id}
               type="button"
               onClick={() => setActiveTab(mod.directTab ?? mod.hubTab)}
-              className={`flex flex-1 flex-col items-center gap-0.5 px-1 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-colors ${
-                active ? 'text-[#6264A7]' : 'text-[#8A8886]'
+              className={`flex flex-col items-center justify-center gap-1 py-1.5 px-0.5 rounded-xl text-[10px] font-bold cursor-pointer transition-colors min-w-0 ${
+                active ? 'text-[#6264A7] bg-[#6264A7]/8' : 'text-[#8A8886]'
               }`}
             >
               <span className="relative">
@@ -61,7 +61,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                   </span>
                 )}
               </span>
-              <span className="truncate max-w-[4.5rem]">{moduleLabel(mod, language)}</span>
+              <span className="truncate w-full text-center leading-tight">{moduleLabel(mod, language)}</span>
             </button>
           );
         })}

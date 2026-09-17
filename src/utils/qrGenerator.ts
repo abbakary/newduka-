@@ -24,6 +24,15 @@ export function getProductQRPayloadString(product: Product): string {
   return `${PRODUCT_QR_PREFIX}${sku}`;
 }
 
+/** Value encoded in Code128 — prefer explicit barcode, else SKU (USB scanner wedge). */
+export function getProductBarcodeValue(product: Product): string {
+  const raw = (product.barcode || product.sku || product.id || '').trim();
+  if (!raw || raw.length > 80) {
+    throw new Error('Invalid barcode/SKU for label');
+  }
+  return raw;
+}
+
 /** @deprecated Legacy JSON — kept for parsing old printed labels only. */
 export function getLegacyProductQRJson(product: Product): string {
   const payload: ProductQRPayload = {

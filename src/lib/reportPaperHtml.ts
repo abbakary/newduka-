@@ -89,13 +89,13 @@ function tableHtml(
   }
   const compact = Boolean(opts?.compact);
   const moneyCols = new Set(opts?.moneyCols ?? []);
-  const pad = compact ? '4px 5px' : '6px 8px';
-  const fs = compact ? '8px' : '10px';
-  const headFs = compact ? '7.5px' : '9px';
+  const pad = compact ? '4px 6px' : '6px 8px';
+  const fs = compact ? '9px' : '10px';
+  const headFs = compact ? '8px' : '9px';
   const head = headers
     .map(
       h =>
-        `<th style="background:#F3F4F6;border:1px solid #E5E7EB;padding:${pad};font-size:${headFs};text-transform:uppercase;letter-spacing:0.02em;color:#374151;white-space:normal;word-break:break-word;line-height:1.25;vertical-align:bottom">${esc(h)}</th>`,
+        `<th style="background:#F3F4F6;border:1px solid #E5E7EB;padding:${pad};font-size:${headFs};text-transform:uppercase;letter-spacing:0.02em;color:#374151;white-space:nowrap;font-weight:700;vertical-align:bottom">${esc(h)}</th>`,
     )
     .join('');
   const body = rows
@@ -104,12 +104,13 @@ function tableHtml(
       return `<tr>${r
         .map((c, ci) => {
           const money = moneyCols.has(ci);
-          return `<td style="border:1px solid #E5E7EB;padding:${pad};font-size:${fs};background:${bg};vertical-align:top;line-height:1.3;word-break:break-word;overflow-wrap:anywhere;${money || ci === 0 ? 'font-variant-numeric:tabular-nums;' : ''}${money ? 'text-align:right;font-weight:600;white-space:nowrap' : ''}">${c}</td>`;
+          return `<td style="border:1px solid #E5E7EB;padding:${pad};font-size:${fs};background:${bg};vertical-align:top;line-height:1.3;${money ? 'text-align:right;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums' : 'white-space:nowrap'}">${c}</td>`;
         })
         .join('')}</tr>`;
     })
     .join('');
-  return `<div style="width:100%;overflow:visible"><table style="width:100%;border-collapse:collapse;table-layout:fixed">${`<colgroup>${headers.map(() => '<col />').join('')}</colgroup>`}<thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  // table-layout:auto so column widths follow content, not fixed splits
+  return `<div style="width:100%;overflow-x:auto"><table style="width:100%;border-collapse:collapse;table-layout:auto"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
 function footerNote(isSw: boolean, extra?: string): string {

@@ -67,23 +67,23 @@ export const ModuleHubView: React.FC<ModuleHubViewProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <header className="space-y-2">
-        <div className="flex items-center gap-3">
+      <header className="space-y-3 text-center">
+        <div className="flex justify-center">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#6264A7]/10 text-[#6264A7]">
             <mod.icon className="h-5 w-5" />
           </span>
-          <div>
-            <h1 className="text-xl md:text-2xl font-black text-[#323130] tracking-tight">
-              {moduleLabel(mod, language)}
-            </h1>
-            <p className="text-sm text-[#605E5C]">
-              {isSw ? mod.hintSw : mod.hintEn}
-            </p>
-          </div>
         </div>
-        <div className="flex items-start gap-2 rounded-xl border border-[#6264A7]/20 bg-[#6264A7]/5 px-4 py-3 text-sm text-[#323130]">
-          <Sparkles className="h-4 w-4 shrink-0 text-[#6264A7] mt-0.5" />
-          <span>{isSw ? greeting.sw : greeting.en}</span>
+        <div>
+          <h1 className="text-xl md:text-2xl font-black text-[#323130] tracking-tight">
+            {moduleLabel(mod, language)}
+          </h1>
+          <p className="text-sm text-[#605E5C] mt-1 max-w-xl mx-auto">
+            {isSw ? mod.hintSw : mod.hintEn}
+          </p>
+        </div>
+        <div className="flex items-start gap-2 rounded-xl border border-[#6264A7]/20 bg-[#6264A7]/5 px-4 py-3 text-sm text-[#323130] max-w-2xl mx-auto text-left sm:text-center sm:justify-center">
+          <Sparkles className="h-4 w-4 shrink-0 text-[#6264A7] mt-0.5 hidden sm:block" />
+          <span className="mx-auto">{isSw ? greeting.sw : greeting.en}</span>
         </div>
       </header>
 

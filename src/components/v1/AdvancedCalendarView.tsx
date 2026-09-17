@@ -18,7 +18,10 @@ import {
   X,
   RefreshCw
 } from 'lucide-react';
-import { CalendarEvent, CalendarEventCategory, Language } from '@/types/v1';
+import { CalendarEvent, CalendarEventCategory, Language, AuthUser } from '@/types/v1';
+import { PageSectionHeader } from '@/components/v1/PageSectionHeader';
+import { useTaxCompliance } from '@/context/TaxComplianceContext';
+import { BusinessPageSubtitle } from '@/lib/businessPageSubtitle';
 import { getTranslation } from '@/utils/translations';
 import { ActionBar } from '@/components/v1/ActionBar';
 import confetti from 'canvas-confetti';
@@ -33,6 +36,7 @@ interface AdvancedCalendarViewProps {
   lowStockCount: number;
   overdueCreditCount: number;
   activeBranchId?: string | null;
+  currentUser?: AuthUser | null;
 }
 
 export const AdvancedCalendarView: React.FC<AdvancedCalendarViewProps> = ({
@@ -43,8 +47,11 @@ export const AdvancedCalendarView: React.FC<AdvancedCalendarViewProps> = ({
   lowStockCount,
   overdueCreditCount,
   activeBranchId,
+  currentUser,
 }) => {
+  const isSw = language === 'sw';
   const t = (key: any) => getTranslation(language, key);
+  const { settings: taxSettings } = useTaxCompliance();
 
   const branchEvents = useMemo(
     () => filterByBranchId(events, activeBranchId),
@@ -197,38 +204,39 @@ export const AdvancedCalendarView: React.FC<AdvancedCalendarViewProps> = ({
 
   return (
     <div className="space-y-5 pb-12">
-      {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-[#323130] tracking-tight">{t('calendarTitle')}</h2>
-          <p className="text-xs text-[#605E5C]">
-            Supplier Restock Drops • Customer Debt Dunning Schedule • TRA VFD Tax Compliance • Shift Rosters
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* AI Smart Schedule Button */}
-          <button
-            id="btn-ai-smart-schedule"
-            onClick={handleAISmartSchedule}
-            disabled={isAIScheduling}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gradient-to-r from-[#0078D4] to-[#6264A7] hover:brightness-110 text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
-          >
-            {isAIScheduling ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-200" />}
-            <span>{isAIScheduling ? 'AI Scheduling...' : t('aiScheduleBtn')}</span>
-          </button>
-
-          {/* Add Event */}
-          <button
-            id="btn-create-event-top"
-            onClick={() => setIsCreatingEvent(!isCreatingEvent)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#6264A7] hover:bg-[#555793] text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{isCreatingEvent ? t('cancel') : t('addEvent')}</span>
-          </button>
-        </div>
-      </div>
+      <PageSectionHeader
+        icon={<CalendarIcon className="w-5 h-5" />}
+        title={t('calendarTitle')}
+        subtitle={
+          <BusinessPageSubtitle
+            currentUser={currentUser}
+            taxSettings={taxSettings}
+            isSw={isSw}
+            detail="Restock • dunning • TRA compliance • shift rosters"
+          />
+        }
+        toolbar={
+          <>
+            <button
+              id="btn-ai-smart-schedule"
+              onClick={handleAISmartSchedule}
+              disabled={isAIScheduling}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gradient-to-r from-[#0078D4] to-[#6264A7] hover:brightness-110 text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
+            >
+              {isAIScheduling ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-200" />}
+              <span>{isAIScheduling ? 'AI Scheduling...' : t('aiScheduleBtn')}</span>
+            </button>
+            <button
+              id="btn-create-event-top"
+              onClick={() => setIsCreatingEvent(!isCreatingEvent)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#6264A7] hover:bg-[#555793] text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{isCreatingEvent ? t('cancel') : t('addEvent')}</span>
+            </button>
+          </>
+        }
+      />
 
       {/* FULL WIDTH ACTION BAR */}
       <ActionBar

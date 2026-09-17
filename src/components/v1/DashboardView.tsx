@@ -97,6 +97,7 @@ import {
   type CashierShiftSession,
 } from '@/lib/cashierShiftStore';
 import { TodaySalesHeroKpi } from '@/components/v1/TodaySalesHeroKpi';
+import { PageSectionHeader } from '@/components/v1/PageSectionHeader';
 
 interface DashboardViewProps {
   language: Language;
@@ -387,31 +388,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="space-y-6 pb-16 animate-in fade-in duration-200">
-      {/* 1. TOP HEADER — full-width title + toolbar spanning edge to edge */}
-      <div className="bg-white rounded-2xl border border-[#E1DFDD] shadow-xs overflow-hidden w-full">
-        <div className="px-4 py-4 sm:px-5 sm:py-4 border-b border-[#EDEBE9] bg-gradient-to-r from-white via-[#FAF9F8] to-white">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2.5 rounded-xl bg-[#6264A7]/10 text-[#6264A7] shrink-0">
-              <LayoutDashboard className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-lg sm:text-xl font-black text-[#323130] tracking-tight">
-                {dashboardTitle}
-              </h2>
-              <p className="text-[11px] sm:text-xs text-[#605E5C] mt-0.5">
-                {currentUser?.businessName || (isSw ? 'Biashara Yako' : 'Your Business')} • {complianceLabel}
-                {persona !== 'owner' && currentUser?.staffRole && (
-                  <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#6264A7]/10 text-[#6264A7] font-bold">
-                    {currentUser.staffRole}
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Full-width action toolbar — buttons stretch edge to edge */}
-        <div className="px-3 py-3 sm:px-4 sm:py-3.5 flex flex-wrap lg:flex-nowrap gap-2 w-full">
+      <PageSectionHeader
+        icon={<LayoutDashboard className="w-5 h-5" />}
+        title={dashboardTitle}
+        subtitle={
+          <>
+            {currentUser?.businessName || (isSw ? 'Biashara Yako' : 'Your Business')} • {complianceLabel}
+            {persona !== 'owner' && currentUser?.staffRole && (
+              <span className="ml-1.5 px-1.5 py-0.5 rounded bg-[#6264A7]/10 text-[#6264A7] font-bold">
+                {currentUser.staffRole}
+              </span>
+            )}
+          </>
+        }
+        toolbar={
+          <>
           {canToggleView && (
             <>
               <button
@@ -462,8 +453,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
             <span>{isSw ? 'Ushauri wa AI' : 'AI Brief'}</span>
           </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ========================================================================= */}
       {/* 2. OWNER / EXECUTIVE MODE SECTION */}
@@ -1515,15 +1507,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+              <div>
+                <table className="w-full text-left text-[10px] sm:text-xs" style={{ tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col style={{ width: '30%' }} />
+                    <col className="hidden sm:table-column" style={{ width: '20%' }} />
+                    <col style={{ width: '22%' }} />
+                    <col style={{ width: '14%' }} />
+                    <col style={{ width: '14%' }} />
+                  </colgroup>
                   <thead>
                     <tr className="border-b border-[#F3F2F1] text-[#605E5C] font-semibold">
-                      <th className="pb-2.5">{isSw ? 'Mteja' : 'Customer'}</th>
-                      <th className="pb-2.5">{isSw ? 'Simu' : 'Phone'}</th>
-                      <th className="pb-2.5">{isSw ? 'Deni Lililopo' : 'Balance'}</th>
-                      <th className="pb-2.5">{isSw ? 'Siku Zilizopita' : 'Overdue'}</th>
-                      <th className="pb-2.5 text-right">{isSw ? 'Hatua ya SMS' : 'Dunning Action'}</th>
+                      <th className="pb-2">{isSw ? 'Mteja' : 'Customer'}</th>
+                      <th className="pb-2 hidden sm:table-cell">{isSw ? 'Simu' : 'Phone'}</th>
+                      <th className="pb-2 text-right">{isSw ? 'Deni' : 'Balance'}</th>
+                      <th className="pb-2">{isSw ? 'Siku' : 'Overdue'}</th>
+                      <th className="pb-2 text-right">{isSw ? 'SMS' : 'SMS'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F3F2F1]">
@@ -1535,41 +1534,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       </tr>
                     ) : topCreditCustomers.filter(c => c.balance > 0).map((cust) => (
                       <tr key={cust.id} className="hover:bg-[#FAF9F8] transition-colors">
-                        <td className="py-2.5 font-bold text-[#323130]">
-                          <div className="flex items-center gap-2.5">
-                            <div className={`w-7 h-7 rounded-full ${cust.avatarColor} text-white font-bold text-[11px] flex items-center justify-center`}>
-                              {cust.name.split(' ').map(n => n[0]).join('')}
+                        <td className="py-2 font-bold text-[#323130]">
+                          <div className="flex items-center gap-1.5">
+                            <div className={`w-6 h-6 rounded-full ${cust.avatarColor} text-white font-bold text-[9px] flex items-center justify-center shrink-0`}>
+                              {cust.name.split(' ').map((n: string) => n[0]).join('')}
                             </div>
-                            <span>{cust.name}</span>
+                            <span className="truncate">{cust.name}</span>
                           </div>
                         </td>
-                        <td className="py-2.5 text-[#605E5C] font-mono">{cust.phone}</td>
-                        <td className="py-2.5 font-extrabold text-rose-600">{formatTSh(cust.balance)}</td>
-                        <td className="py-2.5">
-                          <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold">
-                            {cust.daysOverdue ?? 0} {isSw ? 'siku' : 'days'}
+                        <td className="py-2 text-[#605E5C] font-mono truncate hidden sm:table-cell">{cust.phone}</td>
+                        <td className="py-2 font-extrabold text-rose-600 text-right">{formatTSh(cust.balance)}</td>
+                        <td className="py-2">
+                          <span className="px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[9px] font-bold">
+                            {cust.daysOverdue ?? 0}d
                           </span>
                         </td>
-                        <td className="py-2.5 text-right">
+                        <td className="py-2 text-right">
                           <button
                             onClick={() => handleSendDunningSms(cust)}
                             disabled={isDunningSent[cust.id]}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 ml-auto transition-all cursor-pointer ${
+                            className={`px-2 py-0.5 rounded-lg text-[9px] font-bold flex items-center gap-0.5 ml-auto transition-all cursor-pointer ${
                               isDunningSent[cust.id]
                                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 : 'bg-[#6264A7] hover:bg-[#525492] text-white shadow-xs'
                             }`}
                           >
                             {isDunningSent[cust.id] ? (
-                              <>
-                                <CheckCircle2 className="w-3 h-3 text-emerald-700" />
-                                <span>SMS Imetumwa</span>
-                              </>
+                              <><CheckCircle2 className="w-2.5 h-2.5 text-emerald-700" /><span>Sent</span></>
                             ) : (
-                              <>
-                                <Send className="w-3 h-3" />
-                                <span>Tuma SMS Lipa</span>
-                              </>
+                              <><Send className="w-2.5 h-2.5" /><span>SMS</span></>
                             )}
                           </button>
                         </td>
@@ -1841,25 +1834,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {cashierLeaderboard.length === 0 ? (
             <p className="text-xs text-[#605E5C]">{isSw ? 'Hakuna mauzo ya makeshia leo bado.' : 'No cashier sales recorded yet today.'}</p>
           ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+          <div>
+            <table className="w-full text-[10px] sm:text-xs" style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '30%' }} />
+                <col style={{ width: '12%' }} />
+                <col className="hidden sm:table-column" style={{ width: '19%' }} />
+                <col className="hidden sm:table-column" style={{ width: '19%' }} />
+                <col style={{ width: '20%' }} />
+              </colgroup>
               <thead>
                 <tr className="text-left text-[#605E5C] border-b border-[#EDEBE9]">
                   <th className="py-2 pr-2">{isSw ? 'Keshia' : 'Cashier'}</th>
                   <th className="py-2 pr-2">{isSw ? 'Risiti' : 'Receipts'}</th>
-                  <th className="py-2 pr-2">Cash</th>
-                  <th className="py-2 pr-2">{isSw ? 'Simu' : 'Mobile'}</th>
+                  <th className="py-2 pr-2 hidden sm:table-cell">Cash</th>
+                  <th className="py-2 pr-2 hidden sm:table-cell">{isSw ? 'Simu' : 'Mobile'}</th>
                   <th className="py-2 text-right">{isSw ? 'Jumla' : 'Revenue'}</th>
                 </tr>
               </thead>
               <tbody>
                 {cashierLeaderboard.slice(0, 8).map(row => (
                   <tr key={row.cashierName} className="border-b border-[#F3F2F1]">
-                    <td className="py-2 pr-2 font-semibold text-[#323130]">{row.cashierName}</td>
-                    <td className="py-2 pr-2">{row.receipts}</td>
-                    <td className="py-2 pr-2">{formatTSh(row.cash)}</td>
-                    <td className="py-2 pr-2">{formatTSh(row.mobile)}</td>
-                    <td className="py-2 text-right font-bold text-emerald-700">{formatTSh(row.revenue)}</td>
+                    <td className="py-1.5 pr-2 font-semibold text-[#323130] truncate">{row.cashierName}</td>
+                    <td className="py-1.5 pr-2">{row.receipts}</td>
+                    <td className="py-1.5 pr-2 hidden sm:table-cell">{formatTSh(row.cash)}</td>
+                    <td className="py-1.5 pr-2 hidden sm:table-cell">{formatTSh(row.mobile)}</td>
+                    <td className="py-1.5 text-right font-bold text-emerald-700">{formatTSh(row.revenue)}</td>
                   </tr>
                 ))}
               </tbody>

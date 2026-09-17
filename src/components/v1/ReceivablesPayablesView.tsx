@@ -48,6 +48,9 @@ import {
   canSettleSupplierPayable,
 } from '@/lib/rbac';
 import { useDocumentTemplates } from '@/context/DocumentTemplateContext';
+import { PageSectionHeader } from '@/components/v1/PageSectionHeader';
+import { useTaxCompliance } from '@/context/TaxComplianceContext';
+import { BusinessPageSubtitle } from '@/lib/businessPageSubtitle';
 import { printDocument } from '@/lib/documentRenderer';
 import { settlementToRenderData } from '@/lib/documentDataMappers';
 import { formatDueDateDisplay } from '@/lib/dueDate';
@@ -120,6 +123,7 @@ export const ReceivablesPayablesView: React.FC<ReceivablesPayablesViewProps> = (
 }) => {
   const isSw = language === 'sw';
   const t = (key: any) => getTranslation(language, key);
+  const { settings: taxSettings } = useTaxCompliance();
   const { config, getActive } = useDocumentTemplates();
 
   const branchCustomers = useMemo(
@@ -540,53 +544,50 @@ export const ReceivablesPayablesView: React.FC<ReceivablesPayablesViewProps> = (
 
   return (
     <div className="space-y-5 pb-16">
-      {/* HEADER WITH SUMMARY TITLE & ACTIONS */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-tr from-[#0078D4] to-[#6264A7] text-white shadow-sm">
-              <CreditCard className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-[#323130] tracking-tight">
-                {isSw ? 'Usimamizi wa Madeni (Receivables & Payables)' : 'Accounts Receivable & Payable Ledger'}
-              </h2>
-              <p className="text-xs text-[#605E5C]">
-                {isSw 
-                  ? 'Kusanya madeni ya wateja (Full/Partial/Credit) • Lipa madeni ya wasambazaji • Hati za Malipo & SMS' 
-                  : 'Settle customer credit debts (Full/Partial) • Disburse supplier payables • Real-time vouchers & SMS reconciliation'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onNavigateToPOS && (
+      <PageSectionHeader
+        icon={<CreditCard className="w-5 h-5" />}
+        title={isSw ? 'Usimamizi wa Madeni' : 'Receivables & Payables'}
+        subtitle={
+          <BusinessPageSubtitle
+            currentUser={currentUser}
+            taxSettings={taxSettings}
+            isSw={isSw}
+            detail={
+              isSw
+                ? 'Madeni ya wateja na wasambazaji · malipo · hati & SMS'
+                : 'Customer & supplier balances · settlements · vouchers & SMS'
+            }
+          />
+        }
+        toolbar={
+          <>
+            {onNavigateToPOS && (
+              <button
+                onClick={onNavigateToPOS}
+                className="px-3.5 py-2 rounded-xl bg-[#6264A7] hover:bg-[#555793] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+              >
+                <Receipt className="w-4 h-4 text-amber-300" />
+                <span>{isSw ? 'Nenda POS (Mauzo)' : 'Go to POS Register'}</span>
+              </button>
+            )}
             <button
-              onClick={onNavigateToPOS}
-              className="px-3.5 py-2 rounded-xl bg-[#6264A7] hover:bg-[#555793] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
+              onClick={() => {
+                if (onOpenAIChatWithPrompt) {
+                  onOpenAIChatWithPrompt(
+                    isSw
+                      ? `Fanya uchambuzi wa kina wa madeni ya wateja (Receivables: ${formatTSh(totalReceivables)}) na madeni ya wasambazaji (Payables: ${formatTSh(totalPayables)}), kisha toa mkakati wa kurejesha madeni yaliyochelewa na kuboresha mtaji kazi (Working Capital).`
+                      : `Provide an executive liquidity analysis of our customer receivables (${formatTSh(totalReceivables)}) vs supplier payables (${formatTSh(totalPayables)}), with an optimal debt recovery schedule and cash flow optimization plan.`,
+                  );
+                }
+              }}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:brightness-105 transition-all cursor-pointer"
             >
-              <Receipt className="w-4 h-4 text-amber-300" />
-              <span>{isSw ? 'Nenda POS (Mauzo)' : 'Go to POS Register'}</span>
+              <Sparkles className="w-4 h-4 text-amber-200" />
+              <span>{isSw ? 'AI Uchambuzi wa Mtaji' : 'AI Working Capital Analysis'}</span>
             </button>
-          )}
-          <button
-            onClick={() => {
-              if (onOpenAIChatWithPrompt) {
-                onOpenAIChatWithPrompt(
-                  isSw 
-                    ? `Fanya uchambuzi wa kina wa madeni ya wateja (Receivables: ${formatTSh(totalReceivables)}) na madeni ya wasambazaji (Payables: ${formatTSh(totalPayables)}), kisha toa mkakati wa kurejesha madeni yaliyochelewa na kuboresha mtaji kazi (Working Capital).`
-                    : `Provide an executive liquidity analysis of our customer receivables (${formatTSh(totalReceivables)}) vs supplier payables (${formatTSh(totalPayables)}), with an optimal debt recovery schedule and cash flow optimization plan.`
-                );
-              }
-            }}
-            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:brightness-105 transition-all"
-          >
-            <Sparkles className="w-4 h-4 text-amber-200" />
-            <span>{isSw ? 'AI Uchambuzi wa Mtaji' : 'AI Working Capital Analysis'}</span>
-          </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* TOAST ALERT NOTIFICATION */}
       {toastMessage && (
@@ -806,16 +807,24 @@ export const ReceivablesPayablesView: React.FC<ReceivablesPayablesViewProps> = (
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+          <div>
+            <table className="w-full text-left border-collapse text-[10px] sm:text-xs" style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '28%' }} />
+                <col className="hidden sm:table-column" style={{ width: '14%' }} />
+                <col className="hidden md:table-column" style={{ width: '14%' }} />
+                <col style={{ width: '16%' }} />
+                <col style={{ width: '22%' }} />
+                <col style={{ width: '20%' }} />
+              </colgroup>
               <thead>
                 <tr className="bg-[#FAF9F8] border-b border-[#EDEBE9] text-[#605E5C] font-semibold">
-                  <th className="py-3 px-4">{isSw ? 'Mteja & Mawasiliano' : 'Customer & Contact'}</th>
-                  <th className="py-3 px-4">{isSw ? 'Eneo / Tawi' : 'Location / Territory'}</th>
-                  <th className="py-3 px-4">{isSw ? 'Kikomo cha Mkopo' : 'Credit Limit'}</th>
-                  <th className="py-3 px-4 text-right">{isSw ? 'Deni Lililopo' : 'Current Debt'}</th>
-                  <th className="py-3 px-4">{isSw ? 'Hali & Ukumbusho' : 'Dunning & Status'}</th>
-                  <th className="py-3 px-4 text-center">{isSw ? 'Kitendo cha Malipo' : 'Settlement Action'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Mteja' : 'Customer'}</th>
+                  <th className="py-2 px-2 hidden sm:table-cell">{isSw ? 'Eneo' : 'Location'}</th>
+                  <th className="py-2 px-2 hidden md:table-cell">{isSw ? 'Kikomo' : 'Credit Limit'}</th>
+                  <th className="py-2 px-2 text-right">{isSw ? 'Deni' : 'Debt'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Hali' : 'Status'}</th>
+                  <th className="py-2 px-2 text-center">{isSw ? 'Malipo' : 'Settle'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F3F2F1]">
@@ -825,106 +834,101 @@ export const ReceivablesPayablesView: React.FC<ReceivablesPayablesViewProps> = (
 
                   return (
                     <tr key={cust.id} className="hover:bg-[#F8F9FA] transition-colors">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full ${cust.avatarColor || 'bg-blue-600'} text-white font-bold flex items-center justify-center text-xs shrink-0`}>
+                      <td className="py-2 px-2">
+                        <div className="flex items-center gap-1.5">
+                          <div className={`w-6 h-6 rounded-full ${cust.avatarColor || 'bg-blue-600'} text-white font-bold flex items-center justify-center text-[9px] shrink-0`}>
                             {cust.name.substring(0, 2).toUpperCase()}
                           </div>
-                          <div>
-                            <div className="font-bold text-[#323130] flex items-center gap-1.5">
-                              <span>{cust.name}</span>
-                              <span className={`text-[9px] px-1.5 py-0.2 rounded font-semibold ${
+                          <div className="min-w-0">
+                            <div className="font-bold text-[#323130] truncate flex items-center gap-1">
+                              <span className="truncate">{cust.name}</span>
+                              <span className={`text-[8px] px-1 py-0 rounded font-semibold shrink-0 ${
                                 cust.riskScore === 'High' ? 'bg-rose-100 text-rose-700' :
                                 cust.riskScore === 'Medium' ? 'bg-amber-100 text-amber-700' :
                                 'bg-emerald-100 text-emerald-700'
                               }`}>
-                                {cust.riskScore} Risk
+                                {cust.riskScore}
                               </span>
                             </div>
-                            <div className="text-[11px] text-[#605E5C] font-mono flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3" />
-                              <span>{cust.phone}</span>
-                            </div>
+                            <div className="text-[9px] text-[#605E5C] font-mono truncate">{cust.phone}</div>
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-[#605E5C]">
+                      <td className="py-2 px-2 text-[#605E5C] truncate hidden sm:table-cell">
                         {cust.address || 'Dar es Salaam'}
                       </td>
 
-                      <td className="py-3 px-4">
+                      <td className="py-2 px-2 hidden md:table-cell">
                         <div className="font-medium text-[#323130]">{formatTSh(cust.creditLimit)}</div>
-                        <div className="w-24 h-1.5 bg-[#EDEBE9] rounded-full overflow-hidden mt-1">
+                        <div className="w-16 h-1 bg-[#EDEBE9] rounded-full overflow-hidden mt-1">
                           <div
                             className={`h-full ${percentUsed > 80 ? 'bg-[#D13438]' : percentUsed > 50 ? 'bg-amber-500' : 'bg-[#107C10]'}`}
                             style={{ width: `${percentUsed}%` }}
-                          ></div>
+                          />
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-right">
-                        <div className={`font-black text-sm ${hasDebt ? 'text-[#D13438]' : 'text-[#107C10]'}`}>
+                      <td className="py-2 px-2 text-right">
+                        <div className={`font-black text-xs ${hasDebt ? 'text-[#D13438]' : 'text-[#107C10]'}`}>
                           {formatTSh(cust.balance)}
                         </div>
                         {hasDebt && (
-                          <div className="text-[10px] text-[#605E5C]">
-                            {percentUsed}% {isSw ? 'ya kikomo' : 'of limit'}
-                          </div>
+                          <div className="text-[9px] text-[#605E5C]">{percentUsed}%</div>
                         )}
                       </td>
 
-                      <td className="py-3 px-4">
+                      <td className="py-2 px-2">
                         {hasDebt ? (
-                          <div className="space-y-1">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 capitalize">
-                              <Clock className="w-3 h-3 text-amber-600" />
-                              {(cust.dunningStage || 'stage1_reminder').replace(/_/g, ' ')}
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 capitalize">
+                              <Clock className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                              <span className="truncate">{(cust.dunningStage || 'stage1').replace(/_/g, ' ')}</span>
                             </span>
                             {cust.daysOverdue > 0 && (
-                              <div className="text-[10px] font-bold text-rose-600">
-                                {cust.daysOverdue} {isSw ? 'siku zimechelewa' : 'days overdue'}
+                              <div className="text-[9px] font-bold text-rose-600">
+                                {cust.daysOverdue} {isSw ? 'siku' : 'days'}
                               </div>
                             )}
                           </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-[#107C10] border border-emerald-200">
-                            <Check className="w-3 h-3" />
-                            {isSw ? 'Deni Limelipwa (Cleared)' : 'Cleared / Good Standing'}
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-[#107C10] border border-emerald-200">
+                            <Check className="w-2.5 h-2.5" />
+                            {isSw ? 'Limelipwa' : 'Cleared'}
                           </span>
                         )}
                       </td>
 
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="py-2 px-2 text-center">
+                        <div className="flex items-center justify-center gap-1">
                           {canRecordCustomerPayment && hasDebt ? (
                             <button
                               onClick={() => handleOpenCustomerSettlement(cust)}
-                              className="px-3 py-1.5 rounded-lg bg-[#107C10] hover:bg-[#0e6b0e] text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer"
+                              className="px-2 py-1 rounded-lg bg-[#107C10] hover:bg-[#0e6b0e] text-white font-bold text-[10px] flex items-center gap-0.5 shadow-xs transition-all active:scale-95 cursor-pointer"
                             >
-                              <DollarSign className="w-3.5 h-3.5" />
-                              <span>{isSw ? 'Lipa Deni' : 'Settle Debt'}</span>
+                              <DollarSign className="w-3 h-3" />
+                              <span>{isSw ? 'Lipa' : 'Settle'}</span>
                             </button>
                           ) : canRecordCustomerPayment ? (
                             <button
                               onClick={() => handleOpenCustomerSettlement(cust)}
-                              className="px-2.5 py-1.5 rounded-lg bg-[#F3F2F1] hover:bg-[#EDEBE9] text-[#323130] font-semibold text-xs transition-all"
+                              className="px-2 py-1 rounded-lg bg-[#F3F2F1] hover:bg-[#EDEBE9] text-[#323130] font-semibold text-[10px] transition-all"
                             >
-                              {isSw ? 'Rekebisha Mkopo' : 'Adjust Limit'}
+                              {isSw ? 'Rekebisha' : 'Adjust'}
                             </button>
                           ) : (
-                            <span className="text-[10px] text-[#605E5C] font-medium">
-                              {isSw ? 'Hakuna ruhusa' : 'View only'}
+                            <span className="text-[9px] text-[#605E5C] font-medium">
+                              {isSw ? 'Angalia tu' : 'View only'}
                             </span>
                           )}
 
                           {hasDebt && (
                             <button
                               onClick={() => handleSendSMSAcknowledgment(cust.name, cust.phone, 0, cust.balance)}
-                              title={isSw ? 'Tuma SMS ya Ukumbusho' : 'Send Reminder SMS'}
-                              className="p-1.5 rounded-lg bg-[#0078D4]/10 hover:bg-[#0078D4]/20 text-[#0078D4] transition-colors"
+                              title={isSw ? 'Tuma SMS' : 'Send SMS'}
+                              className="p-1 rounded-lg bg-[#0078D4]/10 hover:bg-[#0078D4]/20 text-[#0078D4] transition-colors"
                             >
-                              <Send className="w-3.5 h-3.5" />
+                              <Send className="w-3 h-3" />
                             </button>
                           )}
                         </div>
@@ -955,16 +959,24 @@ export const ReceivablesPayablesView: React.FC<ReceivablesPayablesViewProps> = (
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+          <div>
+            <table className="w-full text-left border-collapse text-[10px] sm:text-xs" style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '26%' }} />
+                <col className="hidden sm:table-column" style={{ width: '12%' }} />
+                <col style={{ width: '16%' }} />
+                <col style={{ width: '18%' }} />
+                <col className="hidden md:table-column" style={{ width: '12%' }} />
+                <col style={{ width: '16%' }} />
+              </colgroup>
               <thead>
                 <tr className="bg-[#FAF9F8] border-b border-[#EDEBE9] text-[#605E5C] font-semibold">
-                  <th className="py-3 px-4">{isSw ? 'Msambazaji & Kampuni' : 'Supplier & Company'}</th>
-                  <th className="py-3 px-4">{isSw ? 'Aina ya Bidhaa' : 'Category'}</th>
-                  <th className="py-3 px-4">{isSw ? 'Muda wa Mkopo (Terms)' : 'Payment Terms'}</th>
-                  <th className="py-3 px-4 text-right">{isSw ? 'Deni Lililopo (Payable)' : 'Outstanding Payable'}</th>
-                  <th className="py-3 px-4">{isSw ? 'Muda wa Uwasilishaji' : 'Lead Time'}</th>
-                  <th className="py-3 px-4 text-center">{isSw ? 'Kitendo cha Malipo' : 'Disbursement Action'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Msambazaji' : 'Supplier'}</th>
+                  <th className="py-2 px-2 hidden sm:table-cell">{isSw ? 'Aina' : 'Category'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Masharti' : 'Terms'}</th>
+                  <th className="py-2 px-2 text-right">{isSw ? 'Deni' : 'Payable'}</th>
+                  <th className="py-2 px-2 hidden md:table-cell">{isSw ? 'Uwasilishaji' : 'Lead Time'}</th>
+                  <th className="py-2 px-2 text-center">{isSw ? 'Lipa' : 'Pay'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F3F2F1]">
@@ -973,63 +985,63 @@ export const ReceivablesPayablesView: React.FC<ReceivablesPayablesViewProps> = (
 
                   return (
                     <tr key={sup.id} className="hover:bg-[#F8F9FA] transition-colors">
-                      <td className="py-3 px-4">
+                      <td className="py-2 px-2">
                         <div>
-                          <div className="font-bold text-[#323130] flex items-center gap-1.5">
-                            <span>{sup.name}</span>
-                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-100 text-purple-700 font-semibold">
-                              ★ {sup.rating || 4.8}
+                          <div className="font-bold text-[#323130] truncate flex items-center gap-1">
+                            <span className="truncate">{sup.name}</span>
+                            <span className="text-[8px] px-1 py-0 rounded bg-purple-100 text-purple-700 font-semibold shrink-0">
+                              ★{sup.rating || 4.8}
                             </span>
                           </div>
-                          <div className="text-[11px] text-[#605E5C] mt-0.5">
+                          <div className="text-[9px] text-[#605E5C] truncate">
                             {sup.contactPerson} • {sup.phone}
                           </div>
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-[#605E5C]">
+                      <td className="py-2 px-2 text-[#605E5C] truncate hidden sm:table-cell">
                         {sup.category}
                       </td>
 
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 rounded-md bg-[#F3F2F1] text-[#323130] font-semibold text-[11px]">
-                          {sup.paymentTerms || 'Net 30 Days'}
+                      <td className="py-2 px-2">
+                        <span className="px-1.5 py-0.5 rounded bg-[#F3F2F1] text-[#323130] font-semibold text-[9px] truncate block">
+                          {sup.paymentTerms || 'Net 30'}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-right">
-                        <div className={`font-black text-sm ${hasPayable ? 'text-purple-700' : 'text-[#107C10]'}`}>
+                      <td className="py-2 px-2 text-right">
+                        <div className={`font-black text-xs ${hasPayable ? 'text-purple-700' : 'text-[#107C10]'}`}>
                           {formatTSh(sup.outstandingPayable || 0)}
                         </div>
                         {hasPayable && (
-                          <div className="text-[10px] text-[#605E5C]">
-                            {isSw ? 'Ankara inasubiri malipo' : 'Pending invoice payment'}
+                          <div className="text-[9px] text-[#605E5C]">
+                            {isSw ? 'Inasubiri' : 'Pending'}
                           </div>
                         )}
                       </td>
 
-                      <td className="py-3 px-4 text-[#605E5C]">
-                        {sup.leadTimeDays || 2} {isSw ? 'Siku za Uwasilishaji' : 'Days Lead Time'}
+                      <td className="py-2 px-2 text-[#605E5C] hidden md:table-cell">
+                        {sup.leadTimeDays || 2}d
                       </td>
 
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="py-2 px-2 text-center">
+                        <div className="flex items-center justify-center gap-1">
                           {canRecordSupplierPayment && hasPayable ? (
                             <button
                               onClick={() => handleOpenSupplierSettlement(sup)}
-                              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-700 to-indigo-700 hover:brightness-110 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer"
+                              className="px-2 py-1 rounded-lg bg-gradient-to-r from-purple-700 to-indigo-700 hover:brightness-110 text-white font-bold text-[9px] flex items-center gap-0.5 shadow-xs transition-all active:scale-95 cursor-pointer"
                             >
-                              <CreditCard className="w-3.5 h-3.5" />
-                              <span>{isSw ? 'Lipa Msambazaji' : 'Pay Supplier'}</span>
+                              <CreditCard className="w-3 h-3" />
+                              <span>{isSw ? 'Lipa' : 'Pay'}</span>
                             </button>
                           ) : !hasPayable ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-[#107C10] border border-emerald-200">
-                              <Check className="w-3 h-3" />
-                              {isSw ? 'Limelipwa Kamili' : 'Paid in Full'}
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-1 rounded text-[9px] font-bold bg-emerald-50 text-[#107C10] border border-emerald-200">
+                              <Check className="w-2.5 h-2.5" />
+                              {isSw ? 'Limelipwa' : 'Paid'}
                             </span>
                           ) : (
-                            <span className="text-[10px] text-[#605E5C] font-medium">
-                              {isSw ? 'Hakuna ruhusa' : 'View only'}
+                            <span className="text-[9px] text-[#605E5C] font-medium">
+                              {isSw ? 'Angalia tu' : 'View only'}
                             </span>
                           )}
                         </div>

@@ -45,7 +45,11 @@ body {
 
 @media (max-width: 1023px) {
   .sidebar-desktop { display: none !important; }
-  .bottom-nav { display: flex !important; }
+  .bottom-nav {
+    display: block !important;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
 }
 
 @media (min-width: 1024px) {

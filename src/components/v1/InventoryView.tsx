@@ -58,6 +58,8 @@ import { runWithOfflineQueue } from '@/lib/offlineMutations';
 import { useOfflineStore } from '@/stores';
 import type { SyncQueueItem } from '@/lib/transactionEngine';
 import { resolveUserPermissions } from '@/lib/rbac';
+import { PageSectionHeader } from '@/components/v1/PageSectionHeader';
+import { getComplianceStatusLabel } from '@/lib/taxComplianceSettings';
 
 interface InventoryViewProps {
   language: Language;
@@ -950,32 +952,23 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         </div>
       )}
 
-      {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-[#323130] tracking-tight">
-              {workplace.icon} {isSw ? workplace.inventory_title_sw : workplace.inventory_title_en}
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#107C10]/10 text-[#107C10] border border-[#107C10]/20">
-              Live Real-Time Sync
-            </span>
-          </div>
-          <p className="text-xs text-[#605E5C] mt-0.5">
-            {isSw
-              ? `${workplace.label_sw} · Udhibiti wa stoo · Thamani ya mali`
-              : `${workplace.label_en} · Stock control · Asset valuation`}
-            {showBatch && (isSw ? ' · Ufuatiliaji wa batch' : ' · Batch tracking')}
-            {showExpiry && (isSw ? ' · Tarehe ya kuisha' : ' · Expiry alerts')}
-            {workplace.features.fractional_units && (isSw ? ' · Vipimo vya sehemu' : ' · Fractional units')}
-            {workplace.features.table_management && (isSw ? ' · Meza/KOT' : ' · Table/KOT')}
-            {workplace.features.appointments && (isSw ? ' · Miadi' : ' · Appointments')}
-            {inventoryReadOnly && (isSw ? ' · Soma tu (hakuna uhariri)' : ' · View only (no edits)')}
-          </p>
-        </div>
-
-        {!inventoryReadOnly && (
-        <div className="flex items-center gap-2">
+      <PageSectionHeader
+        title={`${workplace.icon} ${isSw ? workplace.inventory_title_sw : workplace.inventory_title_en}`}
+        subtitle={
+          <>
+            {currentUser?.businessName || (isSw ? 'Biashara Yako' : 'Your Business')} • {getComplianceStatusLabel(taxSettings, isSw)}
+            {' · '}
+            {isSw ? `${workplace.label_sw} · Udhibiti wa stoo` : `${workplace.label_en} · Stock control`}
+          </>
+        }
+        badge={
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#107C10]/10 text-[#107C10] border border-[#107C10]/20">
+            Live Sync
+          </span>
+        }
+        toolbar={
+          !inventoryReadOnly ? (
+        <div className="flex flex-wrap items-center justify-center gap-2 w-full">
           <button
             onClick={() => setIsQuickStockInOpen(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#107C10] hover:bg-[#0E6A0E] text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
@@ -992,33 +985,34 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             <span>{t('stockOut')}</span>
           </button>
         </div>
-        )}
-      </div>
+          ) : undefined
+        }
+      />
 
       {/* Financial Valuation KPI Matrix */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl p-4 border border-[#E1DFDD] shadow-xs">
-          <div className="text-xs font-medium text-[#605E5C]">Total Stock Asset Value (Cost)</div>
+          <div className="text-xs font-medium text-[#605E5C]">{isSw ? 'Thamani ya Stoo (Gharama)' : 'Total Stock Asset Value (Cost)'}</div>
           <div className="text-xl font-extrabold text-[#323130] mt-1 font-mono">{formatTSh(totalCostValuation)}</div>
-          <div className="text-[11px] text-[#605E5C] mt-1">{products.length} Active SKUs in Catalog</div>
+          <div className="text-[11px] text-[#605E5C] mt-1">{products.length} {isSw ? 'SKU Zinazofanya Kazi' : 'Active SKUs in Catalog'}</div>
         </div>
 
         <div className="bg-white rounded-xl p-4 border border-[#E1DFDD] shadow-xs">
-          <div className="text-xs font-medium text-[#605E5C]">Total Retail Potential Value</div>
+          <div className="text-xs font-medium text-[#605E5C]">{isSw ? 'Thamani ya Kuuza (Reja)' : 'Total Retail Potential Value'}</div>
           <div className="text-xl font-extrabold text-[#0078D4] mt-1 font-mono">{formatTSh(totalRetailValuation)}</div>
-          <div className="text-[11px] text-[#107C10] font-semibold mt-1">Est. Gross Margin: ~{potentialMarginPercent}%</div>
+          <div className="text-[11px] text-[#107C10] font-semibold mt-1">{isSw ? `Est. Faida Jumla: ~${potentialMarginPercent}%` : `Est. Gross Margin: ~${potentialMarginPercent}%`}</div>
         </div>
 
         <div className="bg-white rounded-xl p-4 border border-[#E1DFDD] shadow-xs">
-          <div className="text-xs font-medium text-[#605E5C]">Reorder Triggers</div>
-          <div className="text-xl font-extrabold text-amber-600 mt-1">{lowStockCount} Low Items</div>
-          <div className="text-[11px] text-[#D13438] font-semibold mt-1">{criticalStockCount} Critical (&le; 5 units)</div>
+          <div className="text-xs font-medium text-[#605E5C]">{isSw ? 'Bidhaa Zinazohitaji Kuagizwa' : 'Reorder Triggers'}</div>
+          <div className="text-xl font-extrabold text-amber-600 mt-1">{lowStockCount} {isSw ? 'Stoo Chini' : 'Low Items'}</div>
+          <div className="text-[11px] text-[#D13438] font-semibold mt-1">{criticalStockCount} {isSw ? 'Hatarini (≤ 5)' : 'Critical (≤ 5 units)'}</div>
         </div>
 
         <div className="bg-white rounded-xl p-4 border border-[#E1DFDD] shadow-xs">
-          <div className="text-xs font-medium text-[#605E5C]">Pending Deliveries from POs</div>
-          <div className="text-xl font-extrabold text-[#6264A7] mt-1">{pendingOrders.length} Inbound POs</div>
-          <div className="text-[11px] text-[#605E5C] mt-1">Ready for 1-Click Stock-In</div>
+          <div className="text-xs font-medium text-[#605E5C]">{isSw ? 'Maagizo Yanayosubiri (PO)' : 'Pending Deliveries from POs'}</div>
+          <div className="text-xl font-extrabold text-[#6264A7] mt-1">{pendingOrders.length} {isSw ? 'PO za Ndani' : 'Inbound POs'}</div>
+          <div className="text-[11px] text-[#605E5C] mt-1">{isSw ? 'Tayari kwa Kuingiza Stoo' : 'Ready for 1-Click Stock-In'}</div>
         </div>
       </div>
 
@@ -1033,7 +1027,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           }`}
         >
           <Boxes className="w-4 h-4" />
-          <span>Product Catalog ({products.length})</span>
+          <span>{isSw ? `Bidhaa Zote (${products.length})` : `Product Catalog (${products.length})`}</span>
         </button>
 
         {!inventoryReadOnly && (
@@ -1046,7 +1040,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           }`}
         >
           <ArrowDownLeft className="w-4 h-4" />
-          <span>Inbound Goods & PO Receive ({pendingOrders.length})</span>
+          <span>{isSw ? `Bidhaa Zinazoingia & PO (${pendingOrders.length})` : `Inbound Goods & PO Receive (${pendingOrders.length})`}</span>
         </button>
         )}
 
@@ -1059,7 +1053,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           }`}
         >
           <History className="w-4 h-4" />
-          <span>Stock Movement Audit Trail ({stockMovements.length})</span>
+          <span>{isSw ? `Harakati za Stoo (${stockMovements.length})` : `Stock Movement Audit Trail (${stockMovements.length})`}</span>
         </button>
       </div>
 
@@ -1085,7 +1079,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               <Search className="w-4 h-4 text-[#605E5C] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search product name, category, or SKU..."
+                placeholder={isSw ? 'Tafuta jina, kategoria au SKU...' : 'Search product name, category, or SKU...'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-4 py-1.5 text-xs bg-[#F3F2F1] border border-transparent focus:border-[#0078D4] focus:bg-white rounded-lg outline-none"
@@ -1110,7 +1104,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   filterType === 'all' ? 'bg-[#323130] text-white shadow-xs' : 'bg-[#F3F2F1] text-[#605E5C]'
                 }`}
               >
-                All Stock ({products.length})
+                {isSw ? `Zote (${products.length})` : `All Stock (${products.length})`}
               </button>
               <button
                 onClick={() => setFilterType('low')}
@@ -1118,7 +1112,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   filterType === 'low' ? 'bg-[#D13438] text-white shadow-xs' : 'bg-[#F3F2F1] text-[#605E5C]'
                 }`}
               >
-                ⚠️ Low Stock ({lowStockCount})
+                ⚠️ {isSw ? `Stoo Chini (${lowStockCount})` : `Low Stock (${lowStockCount})`}
               </button>
               <button
                 onClick={() => setFilterType('critical')}
@@ -1126,25 +1120,25 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   filterType === 'critical' ? 'bg-rose-900 text-white shadow-xs' : 'bg-[#F3F2F1] text-[#605E5C]'
                 }`}
               >
-                🚨 Critical ({criticalStockCount})
+                🚨 {isSw ? `Hatarini (${criticalStockCount})` : `Critical (${criticalStockCount})`}
               </button>
             </div>
           </div>
 
           {/* PRODUCTS DATA TABLE */}
           <div className="bg-white rounded-xl border border-[#E1DFDD] shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+              <table className="w-full text-left text-[10px] sm:text-xs" style={{ tableLayout: 'fixed' }}>
                 <thead className="bg-[#F8F8F8] border-b border-[#EDEBE9] text-[#605E5C] font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">{isSw ? 'Picha & Bidhaa' : 'Photo & Product'}</th>
-                    <th className="py-3 px-3">{showBatch ? 'SKU & Batch' : 'SKU'}</th>
-                    <th className="py-3 px-3">Selling Price</th>
-                    <th className="py-3 px-3">Cost Price</th>
-                    <th className="py-3 px-3">Stock Level</th>
-                    <th className="py-3 px-3">Asset Value</th>
-                    {showExpiry && <th className="py-3 px-3">Expiry Date</th>}
-                    <th className="py-3 px-4 text-right">Quick Stock</th>
+                    <th className="py-2 px-3" style={{ width: '28%' }}>{isSw ? 'Picha & Bidhaa' : 'Photo & Product'}</th>
+                    <th className="py-2 px-2 hidden sm:table-cell" style={{ width: '12%' }}>{showBatch ? 'SKU & Batch' : 'SKU'}</th>
+                    <th className="py-2 px-2 text-right" style={{ width: '13%' }}>{isSw ? 'Bei Kuuza' : 'Sell Price'}</th>
+                    <th className="py-2 px-2 text-right hidden md:table-cell" style={{ width: '13%' }}>{isSw ? 'Bei Gharama' : 'Cost'}</th>
+                    <th className="py-2 px-2" style={{ width: '14%' }}>{isSw ? 'Stoo' : 'Stock'}</th>
+                    <th className="py-2 px-2 text-right hidden lg:table-cell" style={{ width: '12%' }}>{isSw ? 'Thamani' : 'Value'}</th>
+                    {showExpiry && <th className="py-2 px-2 hidden xl:table-cell" style={{ width: '10%' }}>{isSw ? 'Inaisha' : 'Expiry'}</th>}
+                    <th className="py-2 px-2 text-right" style={{ width: '18%' }}>{isSw ? 'Haraka' : 'Quick'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F3F2F1]">
@@ -1161,8 +1155,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                           isSelected ? 'bg-[#F0F2FA]' : ''
                         }`}
                       >
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2.5">
+                        <td className="py-2 px-3">
+                          <div className="flex items-center gap-2">
                             <button
                               type="button"
                               title={isSw ? 'Badilisha picha' : 'Change photo'}
@@ -1178,57 +1172,57 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                                 {isSw ? 'Picha' : 'Photo'}
                               </span>
                             </button>
-                            <div>
-                              <div className="font-bold text-[#323130]">{prod.name}</div>
-                              <div className="text-[10px] text-[#605E5C]">{prod.category}</div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-[#323130] truncate">{prod.name}</div>
+                              <div className="text-[10px] text-[#605E5C] truncate">{prod.category}</div>
                               <ProductMetaBadges
                                 product={prod}
                                 businessType={businessType}
                                 language={language}
-                                max={3}
-                                className="mt-1"
+                                max={2}
+                                className="mt-0.5"
                               />
                             </div>
                           </div>
                         </td>
 
-                        <td className="py-3 px-3 font-mono">
-                          <div className="text-[11px] text-[#323130] font-bold">{prod.sku}</div>
+                        <td className="py-2 px-2 font-mono hidden sm:table-cell">
+                          <div className="text-[11px] text-[#323130] font-bold truncate">{prod.sku}</div>
                           {showBatch && (
-                            <div className="text-[10px] text-[#605E5C]">{prod.batchNumber || 'N/A'}</div>
+                            <div className="text-[10px] text-[#605E5C] truncate">{prod.batchNumber || 'N/A'}</div>
                           )}
                         </td>
 
-                        <td className="py-3 px-3 font-bold text-[#0078D4] font-mono">
+                        <td className="py-2 px-2 font-bold text-[#0078D4] font-mono text-right text-[10px]">
                           {formatTSh(prod.price)}
                         </td>
 
-                        <td className="py-3 px-3 text-[#605E5C] font-mono">
+                        <td className="py-2 px-2 text-[#605E5C] font-mono text-right text-[10px] hidden md:table-cell">
                           {formatTSh(prod.cost)}
                         </td>
 
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-1.5">
-                            <span className={`font-extrabold ${isCritical ? 'text-[#D13438]' : isLow ? 'text-amber-600' : 'text-[#107C10]'}`}>
+                        <td className="py-2 px-2">
+                          <div className="flex flex-wrap items-center gap-1">
+                            <span className={`font-extrabold text-[10px] ${isCritical ? 'text-[#D13438]' : isLow ? 'text-amber-600' : 'text-[#107C10]'}`}>
                               {prod.stock} {prod.unit}
                             </span>
                             {isLow && (
-                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${
+                              <span className={`text-[8px] font-bold px-1 py-0.5 rounded-full leading-none ${
                                 isCritical ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
                               }`}>
-                                {isCritical ? 'Critical' : 'Low'}
+                                {isCritical ? (isSw ? '🚨' : 'Crit') : (isSw ? '⚠️' : 'Low')}
                               </span>
                             )}
                           </div>
                           <div className="text-[9px] text-[#605E5C]">Min: {prod.reorderPoint}</div>
                         </td>
 
-                        <td className="py-3 px-3 font-mono font-semibold text-[#323130]">
+                        <td className="py-2 px-2 font-mono font-semibold text-[#323130] text-right text-[10px] hidden lg:table-cell">
                           {formatTSh(prod.stock * prod.cost)}
                         </td>
 
                         {showExpiry && (
-                          <td className="py-3 px-3 text-[#605E5C] font-mono">
+                          <td className="py-2 px-2 text-[#605E5C] font-mono text-[10px] hidden xl:table-cell">
                             {prod.expiryDate || '—'}
                           </td>
                         )}
@@ -1293,15 +1287,19 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         <div className="space-y-4">
           <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-[#E1DFDD] shadow-xs">
             <div>
-              <h3 className="font-bold text-sm text-[#323130]">Inbound Goods & 1-Click Purchase Order Fulfillment</h3>
-              <p className="text-xs text-[#605E5C]">Instantly update inventory levels and register new products from supplier deliveries</p>
+              <h3 className="font-bold text-sm text-[#323130]">
+                {isSw ? 'Bidhaa Zinazoingia & Kukamilisha PO kwa Kbonyeza Moja' : 'Inbound Goods & 1-Click Purchase Order Fulfillment'}
+              </h3>
+              <p className="text-xs text-[#605E5C]">
+                {isSw ? 'Sasisha viwango vya stoo na usajili wa bidhaa mpya kutoka kwa wasambazaji' : 'Instantly update inventory levels and register new products from supplier deliveries'}
+              </p>
             </div>
             <button
               onClick={() => setIsQuickStockInOpen(true)}
               className="px-4 py-2 rounded-lg bg-[#107C10] text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Direct Manual Stock In</span>
+              <span>{isSw ? 'Ingiza Stoo Moja kwa Moja' : 'Direct Manual Stock In'}</span>
             </button>
           </div>
 
@@ -1309,8 +1307,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             {pendingOrders.length === 0 ? (
               <div className="col-span-2 text-center py-12 bg-white rounded-xl border border-[#EDEBE9] text-xs text-[#605E5C] space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-[#107C10] mx-auto" />
-                <div className="font-bold text-sm text-[#323130]">All Supplier Deliveries Received</div>
-                <p>There are no pending purchase orders awaiting stock-in at this time.</p>
+                <div className="font-bold text-sm text-[#323130]">{isSw ? 'Maagizo Yote Yamepokelewa' : 'All Supplier Deliveries Received'}</div>
+                <p>{isSw ? 'Hakuna maagizo yanayosubiri kuingizwa stoo kwa sasa.' : 'There are no pending purchase orders awaiting stock-in at this time.'}</p>
               </div>
             ) : (
               pendingOrders.map(po => (
@@ -1318,19 +1316,19 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   <div className="flex justify-between items-start">
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800">
-                        Inbound Shipment Pending
+                        {isSw ? 'Mzigo Unaoingia' : 'Inbound Shipment Pending'}
                       </span>
                       <h4 className="font-bold text-base text-[#323130] mt-1">{po.poNumber} — {po.supplierName}</h4>
-                      <p className="text-xs text-[#605E5C]">Expected Date: {po.expectedDate} • Terms: {po.paymentTerms}</p>
+                      <p className="text-xs text-[#605E5C]">{isSw ? 'Tarehe Inayotarajiwa' : 'Expected Date'}: {po.expectedDate} • {isSw ? 'Masharti' : 'Terms'}: {po.paymentTerms}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-[#605E5C]">Valuation</div>
+                      <div className="text-xs text-[#605E5C]">{isSw ? 'Thamani' : 'Valuation'}</div>
                       <div className="text-base font-extrabold text-[#323130] font-mono">{formatTSh(po.totalAmount)}</div>
                     </div>
                   </div>
 
                   <div className="bg-[#FAF9F8] rounded-lg p-3 border border-[#EDEBE9] space-y-1 text-xs">
-                    <div className="font-bold text-[#605E5C] text-[10px] uppercase">Manifest Items:</div>
+                    <div className="font-bold text-[#605E5C] text-[10px] uppercase">{isSw ? 'Bidhaa Zilizoagizwa:' : 'Manifest Items:'}</div>
                     {po.items.map((it, idx) => (
                       <div key={idx} className="flex justify-between text-[#323130]">
                         <span className="flex items-center gap-1.5">
@@ -1362,41 +1360,68 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           <div className="bg-white rounded-xl border border-[#E1DFDD] shadow-xs overflow-hidden">
             <div className="p-4 border-b border-[#EDEBE9] flex justify-between items-center">
               <div>
-                <h3 className="font-bold text-sm text-[#323130]">Stock Movement & Audit Log</h3>
-                <p className="text-xs text-[#605E5C]">Complete immutable ledger of sales, receipts, damages, and manual adjustments</p>
+                <h3 className="font-bold text-sm text-[#323130]">
+                  {isSw ? 'Kumbukumbu ya Mabadiliko ya Stoo' : 'Stock Movement & Audit Log'}
+                </h3>
+                <p className="text-xs text-[#605E5C]">
+                  {isSw
+                    ? 'Daftari kamili la mauzo, manunuzi, uharibifu na marekebisho ya mkono'
+                    : 'Complete immutable ledger of sales, receipts, damages, and manual adjustments'}
+                </p>
               </div>
-              <span className="text-xs font-mono text-[#605E5C]">{stockMovements.length} logged events</span>
+              <span className="text-xs font-mono text-[#605E5C]">{stockMovements.length} {isSw ? 'matukio' : 'logged events'}</span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div>
+              <table className="w-full text-left text-[10px] sm:text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '22%' }} />
+                  <col style={{ width: '16%' }} />
+                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '12%' }} />
+                  <col className="hidden md:table-column" style={{ width: '10%' }} />
+                  <col className="hidden lg:table-column" style={{ width: '10%' }} />
+                  <col style={{ width: '8%' }} />
+                </colgroup>
                 <thead className="bg-[#F8F8F8] border-b border-[#EDEBE9] text-[#605E5C] font-bold uppercase">
                   <tr>
-                    <th className="py-3 px-4">Date & Time</th>
-                    <th className="py-3 px-3">Product Name & SKU</th>
-                    <th className="py-3 px-3">Movement Type</th>
-                    <th className="py-3 px-3">Quantity Delta</th>
-                    <th className="py-3 px-3">Stock Before / After</th>
-                    <th className="py-3 px-3">Valuation Impact</th>
-                    <th className="py-3 px-3">Reference / Txn</th>
-                    <th className="py-3 px-4">Staff / Notes</th>
+                    <th className="py-2 px-2">{isSw ? 'Tarehe' : 'Date'}</th>
+                    <th className="py-2 px-2">{isSw ? 'Bidhaa' : 'Product'}</th>
+                    <th className="py-2 px-2">{isSw ? 'Aina' : 'Type'}</th>
+                    <th className="py-2 px-2 text-right">{isSw ? 'Idadi' : 'Qty'}</th>
+                    <th className="py-2 px-2 text-center">{isSw ? 'Kabla→Baada' : 'Before→After'}</th>
+                    <th className="py-2 px-2 text-right hidden md:table-cell">{isSw ? 'Thamani' : 'Value'}</th>
+                    <th className="py-2 px-2 hidden lg:table-cell">{isSw ? 'Kumbukumbu' : 'Reference'}</th>
+                    <th className="py-2 px-2">{isSw ? 'Mfanyakazi' : 'Staff'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F3F2F1]">
                   {stockMovements.map(sm => {
                     const isIn = sm.quantity > 0;
+                    const movLabel = isSw
+                      ? sm.type === 'in_purchase'  ? 'MANUNUZI'
+                      : sm.type === 'out_sale'      ? 'MAUZO'
+                      : sm.type === 'out_damage'    ? 'UHARIBIFU'
+                      : sm.type === 'out_expiry'    ? 'KUISHA'
+                      : 'MAREKEBISHO'
+                      : sm.type === 'in_purchase'   ? 'PURCHASE'
+                      : sm.type === 'out_sale'      ? 'SALE'
+                      : sm.type === 'out_damage'    ? 'DAMAGE'
+                      : sm.type === 'out_expiry'    ? 'EXPIRY'
+                      : 'ADJUST';
                     return (
                       <tr key={sm.id} className="hover:bg-[#FAF9F8]">
-                        <td className="py-3 px-4 font-mono text-[#605E5C]">{sm.date}</td>
+                        <td className="py-2 px-2 font-mono text-[#605E5C] truncate">{sm.date}</td>
 
-                        <td className="py-3 px-3">
-                          <div className="font-bold text-[#323130]">{sm.productName}</div>
-                          <div className="text-[10px] text-[#605E5C] font-mono">{sm.sku}</div>
+                        <td className="py-2 px-2">
+                          <div className="font-bold text-[#323130] truncate">{sm.productName}</div>
+                          <div className="text-[9px] text-[#605E5C] font-mono truncate">{sm.sku}</div>
                         </td>
 
-                        <td className="py-3 px-3">
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            sm.type === 'in_purchase' 
+                        <td className="py-2 px-2">
+                          <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                            sm.type === 'in_purchase'
                               ? 'bg-emerald-100 text-emerald-800'
                               : sm.type === 'out_sale'
                               ? 'bg-blue-100 text-blue-800'
@@ -1404,32 +1429,31 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                               ? 'bg-rose-100 text-rose-800'
                               : 'bg-amber-100 text-amber-800'
                           }`}>
-                            {isIn ? <ArrowDownLeft className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
-                            {sm.type.replace('_', ' ').toUpperCase()}
+                            {isIn ? <ArrowDownLeft className="w-2.5 h-2.5 shrink-0" /> : <ArrowUpRight className="w-2.5 h-2.5 shrink-0" />}
+                            <span className="truncate">{movLabel}</span>
                           </span>
                         </td>
 
-                        <td className="py-3 px-3 font-extrabold font-mono">
+                        <td className="py-2 px-2 font-extrabold font-mono text-right">
                           <span className={isIn ? 'text-[#107C10]' : 'text-[#D13438]'}>
                             {isIn ? `+${sm.quantity}` : sm.quantity}
                           </span>
                         </td>
 
-                        <td className="py-3 px-3 font-mono text-[#605E5C]">
-                          {sm.previousStock} &rarr; <span className="font-bold text-[#323130]">{sm.newStock}</span>
+                        <td className="py-2 px-2 font-mono text-[#605E5C] text-center text-[9px]">
+                          {sm.previousStock}→<span className="font-bold text-[#323130]">{sm.newStock}</span>
                         </td>
 
-                        <td className="py-3 px-3 font-mono text-[#323130]">
+                        <td className="py-2 px-2 font-mono text-[#323130] text-right hidden md:table-cell">
                           {formatTSh(sm.totalValuation || 0)}
                         </td>
 
-                        <td className="py-3 px-3 font-mono text-[#0078D4] font-semibold">
+                        <td className="py-2 px-2 font-mono text-[#0078D4] font-semibold truncate hidden lg:table-cell">
                           {sm.referenceId || sm.referenceType || 'MANUAL'}
                         </td>
 
-                        <td className="py-3 px-4">
-                          <div className="text-[11px] font-semibold text-[#323130]">{sm.operatorName}</div>
-                          <div className="text-[10px] text-[#605E5C]">{sm.notes || '-'}</div>
+                        <td className="py-2 px-2">
+                          <div className="text-[9px] font-semibold text-[#323130] truncate">{sm.operatorName}</div>
                         </td>
                       </tr>
                     );

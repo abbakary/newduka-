@@ -2013,37 +2013,44 @@ export const StaffRoleSiteView: React.FC<StaffRoleSiteViewProps> = ({
             </div>
 
             {/* Advances Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div>
+              <table className="w-full text-left text-[10px] sm:text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '18%' }} />
+                  <col className="hidden sm:table-column" style={{ width: '22%' }} />
+                  <col style={{ width: '22%' }} />
+                  <col style={{ width: '24%' }} />
+                </colgroup>
                 <thead className="bg-[#F8F8F8] text-[#605E5C] font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-3">Tarehe</th>
-                    <th className="py-3 px-3 text-right">Kiasi (TSh)</th>
-                    <th className="py-3 px-3">Sababu ya Dharura</th>
-                    <th className="py-3 px-3 text-center">Hali ya Ombi</th>
-                    <th className="py-3 px-3">Uthibitisho wa Boss</th>
+                    <th className="py-2 px-2">Tarehe</th>
+                    <th className="py-2 px-2 text-right">Kiasi (TSh)</th>
+                    <th className="py-2 px-2 hidden sm:table-cell">Sababu</th>
+                    <th className="py-2 px-2 text-center">Hali</th>
+                    <th className="py-2 px-2">Uthibitisho</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F3F2F1]">
                   {myAdvances.map(adv => (
                     <tr key={adv.id} className="hover:bg-[#FAF9F8]">
-                      <td className="py-3 px-3 font-mono text-[#605E5C]">{adv.date}</td>
-                      <td className="py-3 px-3 text-right font-mono font-black text-rose-600 text-sm">
+                      <td className="py-2 px-2 font-mono text-[#605E5C] truncate">{adv.date}</td>
+                      <td className="py-2 px-2 text-right font-mono font-black text-rose-600">
                         {formatTSh(adv.amount)}
                       </td>
-                      <td className="py-3 px-3 text-[#323130]">{adv.reason}</td>
-                      <td className="py-3 px-3 text-center">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                      <td className="py-2 px-2 text-[#323130] truncate hidden sm:table-cell">{adv.reason}</td>
+                      <td className="py-2 px-2 text-center">
+                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
                           adv.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
                           adv.status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
                           'bg-rose-100 text-rose-800'
                         }`}>
-                          {adv.status === 'approved' ? '✓ IMEIDHINISHWA (M-PESA)' :
-                           adv.status === 'pending' ? '⏳ INASUBIRI IDHINI YA BOSS' : '❌ IMEKATALIWA'}
+                          {adv.status === 'approved' ? '✓ Idhinishwa' :
+                           adv.status === 'pending' ? '⏳ Inasubiri' : '✗ Ilikataliwa'}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-slate-500 font-mono text-[11px]">
-                        {adv.status === 'approved' ? 'Disbursed via M-Pesa Direct' : 'Pending Boss Review'}
+                      <td className="py-2 px-2 text-slate-500 font-mono text-[9px] truncate">
+                        {adv.status === 'approved' ? 'M-Pesa Direct' : 'Inasubiri Boss'}
                       </td>
                     </tr>
                   ))}

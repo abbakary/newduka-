@@ -50,7 +50,9 @@ import {
   capDiscountPercent,
   effectiveUnitPrice,
   isVatActive,
+  getComplianceStatusLabel,
 } from '@/lib/taxComplianceSettings';
+import { PageSectionHeader } from '@/components/v1/PageSectionHeader';
 import { computeSaleDiscountAmount, saleGrossSubtotal } from '@/lib/saleDiscountUtils';
 import { resolvePosPricingAccess, getDashboardPersona } from '@/lib/rbac';
 import { api } from '@/lib/api';
@@ -815,43 +817,45 @@ export const POSView: React.FC<POSViewProps> = ({
           </button>
         </div>
       )}
-      {/* View Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-[#323130] tracking-tight">
-            {workplace.icon} {isSw ? workplace.pos_title_sw : workplace.pos_title_en}
-          </h2>
-          <p className="text-xs text-[#605E5C]">
-            {isSw 
-              ? `${workplace.label_sw} · Mauzo ya haraka · Udhibiti wa hifadhi · Madeni (Full / Partial / Credit)` 
-              : `${workplace.label_en} · Fast checkout · Stock control · Full / Partial / Credit tracking`}
-            {workplace.features.table_management && (isSw ? ' · Meza/KOT' : ' · Table/KOT')}
-            {workplace.features.appointments && (isSw ? ' · Miadi/Huduma' : ' · Service appointments')}
-          </p>
-          {tableContextLabel && (
-            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-teal-100 border border-teal-400 text-teal-900 text-xs font-bold">
-              🍽️ {isSw ? 'Malipo ya Meza' : 'Table Payment'}: {tableContextLabel}
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onNavigateToReceivables && (
+      <PageSectionHeader
+        title={`${workplace.icon} ${isSw ? workplace.pos_title_sw : workplace.pos_title_en}`}
+        subtitle={
+          <>
+            {currentUser?.businessName || (isSw ? 'Biashara Yako' : 'Your Business')} • {getComplianceStatusLabel(taxSettings, isSw)}
+            {tableContextLabel && (
+              <span className="block mt-1 text-teal-800 font-bold">
+                🍽️ {isSw ? 'Meza' : 'Table'}: {tableContextLabel}
+              </span>
+            )}
+          </>
+        }
+        toolbar={
+          <>
+            {onNavigateToReceivables && (
+              <button
+                type="button"
+                onClick={onNavigateToReceivables}
+                className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-[#D13438] border border-rose-200 text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                <span>{isSw ? 'Madeni' : 'Receivables'}</span>
+              </button>
+            )}
             <button
-              onClick={onNavigateToReceivables}
-              className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-[#D13438] border border-rose-200 text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all"
+              type="button"
+              onClick={() => setIsQRScannerOpen(true)}
+              className="px-3 py-1.5 rounded-lg bg-[#6264A7] hover:bg-[#555793] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
             >
-              <CreditCard className="w-3.5 h-3.5" />
-              <span>{isSw ? 'Usimamizi wa Madeni' : 'Manage Receivables'}</span>
+              <QrCode className="w-3.5 h-3.5" />
+              <span>{isSw ? 'Skani' : 'Scan'}</span>
             </button>
-          )}
-
-          <span className="flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-[#107C10]/10 text-[#107C10] border border-[#107C10]/30">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>TRA EFD Online Mode</span>
-          </span>
-        </div>
-      </div>
+            <span className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-[#107C10]/10 text-[#107C10] border border-[#107C10]/30">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>{getComplianceStatusLabel(taxSettings, isSw)}</span>
+            </span>
+          </>
+        }
+      />
 
       {/* STOCK WARNING BANNER IF EXCEEDED */}
       {stockWarningMessage && (

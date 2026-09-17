@@ -752,18 +752,28 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
           </div>
 
           {/* Expenses Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+          <div>
+            <table className="w-full text-left text-[10px] sm:text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '11%' }} />
+                <col style={{ width: '13%' }} />
+                <col style={{ width: '20%' }} />
+                <col className="hidden sm:table-column" style={{ width: '12%' }} />
+                <col style={{ width: '13%' }} />
+                <col className="hidden md:table-column" style={{ width: '14%' }} />
+                <col style={{ width: '10%' }} />
+                {canManage && <col style={{ width: '7%' }} />}
+              </colgroup>
               <thead className="bg-[#F8F8F8] text-[#605E5C] font-bold uppercase tracking-wider">
                 <tr>
-                  <th className="py-3 px-3">Tarehe & Saa</th>
-                  <th className="py-3 px-3">Aina ya Matumizi</th>
-                  <th className="py-3 px-3">Maelezo ya Malipo</th>
-                  <th className="py-3 px-3">Mlipwaji (Recipient)</th>
-                  <th className="py-3 px-3 text-right">Kiasi (TSh)</th>
-                  <th className="py-3 px-3">Njia & Kumbukumbu</th>
-                  <th className="py-3 px-3 text-center">Hali</th>
-                  {canManage && <th className="py-3 px-3 text-center">{isSw ? 'Kitendo' : 'Action'}</th>}
+                  <th className="py-2 px-2">{isSw ? 'Tarehe' : 'Date'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Aina' : 'Type'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Maelezo' : 'Description'}</th>
+                  <th className="py-2 px-2 hidden sm:table-cell">{isSw ? 'Mlipwaji' : 'Recipient'}</th>
+                  <th className="py-2 px-2 text-right">{isSw ? 'Kiasi' : 'Amount'}</th>
+                  <th className="py-2 px-2 hidden md:table-cell">{isSw ? 'Njia & Kumbukumbu' : 'Method & Ref'}</th>
+                  <th className="py-2 px-2 text-center">{isSw ? 'Hali' : 'Status'}</th>
+                  {canManage && <th className="py-2 px-2 text-center">#</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F3F2F1]">
@@ -771,47 +781,47 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
                   const cat = categoryLabels[item.category] || { en: item.category, sw: item.category, color: 'bg-gray-100 text-gray-800' };
                   return (
                     <tr key={item.id} className="hover:bg-[#FAF9F8] transition-colors">
-                      <td className="py-3 px-3 font-mono text-[#605E5C]">
-                        <div>{item.date}</div>
-                        <div className="text-[10px]">{item.time}</div>
+                      <td className="py-2 px-2 font-mono text-[#605E5C]">
+                        <div className="truncate">{item.date}</div>
+                        <div className="text-[9px] truncate">{item.time}</div>
                       </td>
-                      <td className="py-3 px-3">
-                        <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold border ${cat.color}`}>
+                      <td className="py-2 px-2">
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border truncate block ${cat.color}`}>
                           {isSw ? cat.sw : cat.en}
                         </span>
                       </td>
-                      <td className="py-3 px-3">
-                        <div className="font-bold text-[#323130]">{item.title}</div>
-                        {item.notes && <div className="text-[10px] text-[#605E5C] mt-0.5">{item.notes}</div>}
+                      <td className="py-2 px-2">
+                        <div className="font-bold text-[#323130] truncate">{item.title}</div>
+                        {item.notes && <div className="text-[9px] text-[#605E5C] truncate">{item.notes}</div>}
                       </td>
-                      <td className="py-3 px-3 font-medium text-[#323130]">
+                      <td className="py-2 px-2 font-medium text-[#323130] truncate hidden sm:table-cell">
                         {item.recipient}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono font-black text-rose-600 text-sm">
+                      <td className="py-2 px-2 text-right font-mono font-black text-rose-600 text-xs">
                         -{formatTSh(item.amount)}
                       </td>
-                      <td className="py-3 px-3 font-mono text-[11px] text-[#605E5C]">
-                        <div className="capitalize">{item.paymentMethod.replace('_', ' ')}</div>
-                        <div className="text-[10px] font-bold text-slate-700">{item.referenceNumber}</div>
+                      <td className="py-2 px-2 font-mono text-[9px] text-[#605E5C] hidden md:table-cell">
+                        <div className="capitalize truncate">{item.paymentMethod.replace('_', ' ')}</div>
+                        <div className="text-[9px] font-bold text-slate-700 truncate">{item.referenceNumber}</div>
                       </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      <td className="py-2 px-2 text-center">
+                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
                           item.status === 'reconciled'
                             ? 'bg-emerald-100 text-emerald-800'
                             : 'bg-blue-100 text-blue-800'
                         }`}>
-                          {item.status === 'reconciled' ? '✓ Reconciled' : 'Paid'}
+                          {item.status === 'reconciled' ? '✓' : isSw ? 'Lipa' : 'Paid'}
                         </span>
                       </td>
                       {canManage && (
-                        <td className="py-3 px-3 text-center">
+                        <td className="py-2 px-2 text-center">
                           <button
                             type="button"
                             onClick={() => handleDeleteExpense(item.id)}
-                            className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
+                            className="p-1 rounded-lg text-rose-600 hover:bg-rose-50 cursor-pointer"
                             title={isSw ? 'Futa' : 'Delete'}
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       )}
@@ -851,17 +861,26 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
             </div>
 
             {/* Live Today's Disbursal Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div>
+              <table className="w-full text-left text-[10px] sm:text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '22%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col className="hidden sm:table-column" style={{ width: '14%' }} />
+                  <col style={{ width: '11%' }} />
+                </colgroup>
                 <thead className="bg-[#F8F8F8] text-[#605E5C] font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-3">Mfanyakazi & Wadhifa</th>
-                    <th className="py-3 px-3 text-right">Chakula (Food)</th>
-                    <th className="py-3 px-3 text-right">Nauli (Transport)</th>
-                    <th className="py-3 px-3 text-right font-black text-[#323130]">Jumla ya Siku</th>
-                    <th className="py-3 px-3 text-center">Hali ya Madai</th>
-                    <th className="py-3 px-3">Saini ya Kidijitali & Muda</th>
-                    <th className="py-3 px-3 text-center">Vitendo vya Mmiliki</th>
+                    <th className="py-2 px-2">{isSw ? 'Mfanyakazi' : 'Staff'}</th>
+                    <th className="py-2 px-2 text-right">{isSw ? 'Chakula' : 'Food'}</th>
+                    <th className="py-2 px-2 text-right">{isSw ? 'Nauli' : 'Transport'}</th>
+                    <th className="py-2 px-2 text-right font-black text-[#323130]">{isSw ? 'Jumla' : 'Total'}</th>
+                    <th className="py-2 px-2 text-center">{isSw ? 'Hali' : 'Status'}</th>
+                    <th className="py-2 px-2 hidden sm:table-cell">{isSw ? 'Saini & Muda' : 'Signature & Time'}</th>
+                    <th className="py-2 px-2 text-center">{isSw ? 'Vitendo' : 'Actions'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F3F2F1]">
@@ -875,50 +894,50 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
 
                     return (
                       <tr key={staff.id} className="hover:bg-[#FAF9F8] transition-colors">
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-2.5">
-                            <div className={`w-8 h-8 rounded-full ${staff.avatarColor || 'bg-indigo-600'} text-white flex items-center justify-center text-xs font-bold`}>
+                        <td className="py-2 px-2">
+                          <div className="flex items-center gap-1.5">
+                            <div className={`w-6 h-6 rounded-full ${staff.avatarColor || 'bg-indigo-600'} text-white flex items-center justify-center text-[9px] font-bold shrink-0`}>
                               {staff.name.charAt(0)}
                             </div>
-                            <div>
-                              <div className="font-bold text-[#323130]">{staff.name}</div>
-                              <div className="text-[10px] text-[#605E5C]">{staff.role} • {staff.branch}</div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-[#323130] truncate">{staff.name}</div>
+                              <div className="text-[9px] text-[#605E5C] truncate">{staff.role}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="py-3 px-3 text-right font-mono text-[#605E5C]">{formatTSh(food)}</td>
-                        <td className="py-3 px-3 text-right font-mono text-[#605E5C]">{formatTSh(transport)}</td>
-                        <td className="py-3 px-3 text-right font-mono font-black text-emerald-700 text-sm">
+                        <td className="py-2 px-2 text-right font-mono text-[#605E5C]">{formatTSh(food)}</td>
+                        <td className="py-2 px-2 text-right font-mono text-[#605E5C]">{formatTSh(transport)}</td>
+                        <td className="py-2 px-2 text-right font-mono font-black text-emerald-700">
                           {formatTSh(total)}
                         </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                        <td className="py-2 px-2 text-center">
+                          <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
                             isClaimed 
                               ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
                               : 'bg-amber-100 text-amber-800 border border-amber-300 animate-pulse'
                           }`}>
-                            {isClaimed ? '✓ AMECHUKUA' : '⏳ HAIJACHUKULIWA'}
+                            {isClaimed ? '✓' : '⏳'}
                           </span>
                         </td>
-                        <td className="py-3 px-3 font-mono text-[11px]">
+                        <td className="py-2 px-2 font-mono text-[9px] hidden sm:table-cell">
                           {isClaimed ? (
                             <div className="text-emerald-900">
-                              <div className="font-bold">{todayRecord?.acknowledgedSignature}</div>
-                              <div className="text-[10px] text-[#605E5C]">{todayRecord?.claimedTimestamp}</div>
+                              <div className="font-bold truncate">{todayRecord?.acknowledgedSignature}</div>
+                              <div className="text-[9px] text-[#605E5C] truncate">{todayRecord?.claimedTimestamp}</div>
                             </div>
                           ) : (
-                            <span className="text-[#8A8886] italic">{isSw ? 'Inasubiri saini ya mfanyakazi' : 'Awaiting staff check-in'}</span>
+                            <span className="text-[#8A8886] italic">{isSw ? 'Inasubiri' : 'Awaiting'}</span>
                           )}
                         </td>
-                        <td className="py-3 px-3 text-center">
+                        <td className="py-2 px-2 text-center">
                           {canConfigAllowances ? (
                             <div className="flex items-center justify-center gap-1">
                               {!isClaimed && (
                                 <button
                                   onClick={() => handleMarkAllowanceClaimed(staff)}
-                                  className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer text-[10px] font-bold"
+                                  className="px-1.5 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer text-[9px] font-bold"
                                 >
-                                  {isSw ? 'Thibitisha' : 'Confirm'}
+                                  {isSw ? 'OK' : 'OK'}
                                 </button>
                               )}
                               <button
@@ -927,14 +946,13 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
                                   setEditFoodAmount(food);
                                   setEditTransportAmount(transport);
                                 }}
-                                className="p-1.5 rounded-lg bg-[#F3F2F1] hover:bg-[#EDEBE9] text-[#323130] cursor-pointer transition-all text-xs font-bold inline-flex items-center gap-1"
+                                className="p-1 rounded-lg bg-[#F3F2F1] hover:bg-[#EDEBE9] text-[#323130] cursor-pointer transition-all inline-flex items-center"
                               >
-                                <Edit2 className="w-3.5 h-3.5" />
-                                <span>{isSw ? 'Viwango' : 'Rates'}</span>
+                                <Edit2 className="w-3 h-3" />
                               </button>
                             </div>
                           ) : (
-                            <span className="text-[10px] text-[#605E5C]">{isSw ? 'Angalia tu' : 'View only'}</span>
+                            <span className="text-[9px] text-[#605E5C]">—</span>
                           )}
                         </td>
                       </tr>
@@ -1042,19 +1060,30 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
             </div>
 
             {/* Payroll Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div>
+              <table className="w-full text-left text-[10px] sm:text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col className="hidden sm:table-column" style={{ width: '11%' }} />
+                  <col className="hidden sm:table-column" style={{ width: '11%' }} />
+                  <col className="hidden md:table-column" style={{ width: '9%' }} />
+                  <col className="hidden md:table-column" style={{ width: '9%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '14%' }} />
+                </colgroup>
                 <thead className="bg-[#F8F8F8] text-[#605E5C] font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-3">Mfanyakazi</th>
-                    <th className="py-3 px-3 text-right">Mshahara Msingi</th>
-                    <th className="py-3 px-3 text-right">Posho Zilizolipwa</th>
-                    <th className="py-3 px-3 text-right text-rose-600">Makato ya Advance</th>
-                    <th className="py-3 px-3 text-right text-rose-600">NSSF (10%)</th>
-                    <th className="py-3 px-3 text-right text-emerald-600">Bonus</th>
-                    <th className="py-3 px-3 text-right font-black text-indigo-900">Kiasi Halisi (Net Pay)</th>
-                    <th className="py-3 px-3 text-center">Hali ya Malipo</th>
-                    <th className="py-3 px-3 text-center">Vitendo</th>
+                    <th className="py-2 px-2">{isSw ? 'Mfanyakazi' : 'Staff'}</th>
+                    <th className="py-2 px-2 text-right">{isSw ? 'Msingi' : 'Base'}</th>
+                    <th className="py-2 px-2 text-right hidden sm:table-cell">{isSw ? 'Posho' : 'Allow.'}</th>
+                    <th className="py-2 px-2 text-right text-rose-600 hidden sm:table-cell">{isSw ? 'Advance' : 'Advance'}</th>
+                    <th className="py-2 px-2 text-right text-rose-600 hidden md:table-cell">NSSF</th>
+                    <th className="py-2 px-2 text-right text-emerald-600 hidden md:table-cell">{isSw ? 'Bonasi' : 'Bonus'}</th>
+                    <th className="py-2 px-2 text-right font-black text-indigo-900">{isSw ? 'Net' : 'Net Pay'}</th>
+                    <th className="py-2 px-2 text-center">{isSw ? 'Hali' : 'Status'}</th>
+                    <th className="py-2 px-2 text-center">{isSw ? 'Vitendo' : 'Actions'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F3F2F1]">
@@ -1074,11 +1103,11 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
 
                     return (
                       <tr key={staff.id} className="hover:bg-[#FAF9F8] transition-colors">
-                        <td className="py-3 px-3">
-                          <div className="font-bold text-[#323130]">{staff.name}</div>
-                          <div className="text-[10px] text-[#605E5C]">{staff.role} • NSSF: {staff.nssfNumber || 'N/A'}</div>
+                        <td className="py-2 px-2">
+                          <div className="font-bold text-[#323130] truncate">{staff.name}</div>
+                          <div className="text-[9px] text-[#605E5C] truncate">{staff.role}</div>
                         </td>
-                        <td className="py-3 px-3 text-right font-mono font-bold text-[#323130]">
+                        <td className="py-2 px-2 text-right font-mono font-bold text-[#323130]">
                           {canPayroll ? (
                             <button
                               type="button"
@@ -1086,42 +1115,42 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
                                 setEditingBaseSalaryStaffId(staff.id);
                                 setEditBaseSalaryAmount(base);
                               }}
-                              className="inline-flex items-center gap-1 hover:text-indigo-700 cursor-pointer"
-                              title={isSw ? 'Badili mshahara msingi' : 'Edit base salary'}
+                              className="inline-flex items-center gap-0.5 hover:text-indigo-700 cursor-pointer"
+                              title={isSw ? 'Badili mshahara' : 'Edit base salary'}
                             >
                               {formatTSh(base)}
-                              <Edit2 className="w-3 h-3" />
+                              <Edit2 className="w-2.5 h-2.5" />
                             </button>
                           ) : (
                             formatTSh(base)
                           )}
                         </td>
-                        <td className="py-3 px-3 text-right font-mono text-emerald-700">{formatTSh(allowances)}</td>
-                        <td className="py-3 px-3 text-right font-mono text-rose-600 font-bold">
+                        <td className="py-2 px-2 text-right font-mono text-emerald-700 hidden sm:table-cell">{formatTSh(allowances)}</td>
+                        <td className="py-2 px-2 text-right font-mono text-rose-600 font-bold hidden sm:table-cell">
                           {advancesTotal > 0 ? `-${formatTSh(advancesTotal)}` : '0'}
                         </td>
-                        <td className="py-3 px-3 text-right font-mono text-rose-600">-{formatTSh(nssf)}</td>
-                        <td className="py-3 px-3 text-right font-mono text-emerald-600 font-bold">+{formatTSh(bonus)}</td>
-                        <td className="py-3 px-3 text-right font-mono font-black text-indigo-900 text-sm">
+                        <td className="py-2 px-2 text-right font-mono text-rose-600 hidden md:table-cell">-{formatTSh(nssf)}</td>
+                        <td className="py-2 px-2 text-right font-mono text-emerald-600 font-bold hidden md:table-cell">+{formatTSh(bonus)}</td>
+                        <td className="py-2 px-2 text-right font-mono font-black text-indigo-900">
                           {formatTSh(paidRecord ? paidRecord.netPayable : net)}
                         </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        <td className="py-2 px-2 text-center">
+                          <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
                             isPaid
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-amber-100 text-amber-800'
                           }`}>
-                            {isPaid ? '✓ IMELIPWA' : '⏳ TAYARI KULIPWA'}
+                            {isPaid ? '✓' : '⏳'}
                           </span>
                         </td>
-                        <td className="py-3 px-3 text-center space-x-1">
+                        <td className="py-2 px-2 text-center">
                           {isPaid ? (
                             <button
                               onClick={() => setSelectedPayslip(paidRecord)}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
+                              className="px-1.5 py-0.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[9px] cursor-pointer inline-flex items-center gap-0.5"
                             >
-                              <FileText className="w-3.5 h-3.5" />
-                              <span>Slipi (Payslip)</span>
+                              <FileText className="w-3 h-3" />
+                              <span>Slip</span>
                             </button>
                           ) : canPayroll ? (
                             <button
@@ -1129,13 +1158,13 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
                                 setSelectedStaffForPay(staff);
                                 setIsPaySalaryModalOpen(true);
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
+                              className="px-1.5 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] cursor-pointer inline-flex items-center gap-0.5"
                             >
-                              <Send className="w-3.5 h-3.5" />
-                              <span>Lipa Sasa</span>
+                              <Send className="w-3 h-3" />
+                              <span>{isSw ? 'Lipa' : 'Pay'}</span>
                             </button>
                           ) : (
-                            <span className="text-[10px] text-[#605E5C]">{isSw ? 'Angalia tu' : 'View only'}</span>
+                            <span className="text-[9px] text-[#605E5C]">—</span>
                           )}
                         </td>
                       </tr>
@@ -1181,73 +1210,80 @@ export const ExpensesPayrollView: React.FC<ExpensesPayrollViewProps> = ({
             )}
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+          <div>
+            <table className="w-full text-left text-[10px] sm:text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '10%' }} />
+                <col style={{ width: '18%' }} />
+                <col style={{ width: '15%' }} />
+                <col className="hidden sm:table-column" style={{ width: '18%' }} />
+                <col style={{ width: '14%' }} />
+                <col className="hidden md:table-column" style={{ width: '14%' }} />
+                <col style={{ width: '11%' }} />
+              </colgroup>
               <thead className="bg-[#F8F8F8] text-[#605E5C] font-bold uppercase tracking-wider">
                 <tr>
-                  <th className="py-3 px-3">Tarehe</th>
-                  <th className="py-3 px-3">Mfanyakazi</th>
-                  <th className="py-3 px-3 text-right">Kiasi Kilichoombwa</th>
-                  <th className="py-3 px-3">Sababu ya Dharura</th>
-                  <th className="py-3 px-3 text-center">Hali</th>
-                  <th className="py-3 px-3">Uthibitisho / Njia</th>
-                  <th className="py-3 px-3 text-center">Uamuzi wa Mmiliki</th>
+                  <th className="py-2 px-2">{isSw ? 'Tarehe' : 'Date'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Mfanyakazi' : 'Staff'}</th>
+                  <th className="py-2 px-2 text-right">{isSw ? 'Kiasi' : 'Amount'}</th>
+                  <th className="py-2 px-2 hidden sm:table-cell">{isSw ? 'Sababu' : 'Reason'}</th>
+                  <th className="py-2 px-2 text-center">{isSw ? 'Hali' : 'Status'}</th>
+                  <th className="py-2 px-2 hidden md:table-cell">{isSw ? 'Njia' : 'Method'}</th>
+                  <th className="py-2 px-2 text-center">{isSw ? 'Uamuzi' : 'Decision'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F3F2F1]">
                 {advances.map(adv => (
                   <tr key={adv.id} className="hover:bg-[#FAF9F8] transition-colors">
-                    <td className="py-3 px-3 font-mono text-[#605E5C]">{adv.dateRequested}</td>
-                    <td className="py-3 px-3">
-                      <div className="font-bold text-[#323130]">{adv.staffName}</div>
-                      <div className="text-[10px] text-[#605E5C]">{adv.staffRole}</div>
+                    <td className="py-2 px-2 font-mono text-[#605E5C] truncate">{adv.dateRequested}</td>
+                    <td className="py-2 px-2">
+                      <div className="font-bold text-[#323130] truncate">{adv.staffName}</div>
+                      <div className="text-[9px] text-[#605E5C] truncate">{adv.staffRole}</div>
                     </td>
-                    <td className="py-3 px-3 text-right font-mono font-black text-rose-600 text-sm">
+                    <td className="py-2 px-2 text-right font-mono font-black text-rose-600">
                       {formatTSh(adv.requestedAmount)}
                     </td>
-                    <td className="py-3 px-3 text-[#323130] max-w-xs">{adv.reason}</td>
-                    <td className="py-3 px-3 text-center">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                    <td className="py-2 px-2 text-[#323130] truncate hidden sm:table-cell">{adv.reason}</td>
+                    <td className="py-2 px-2 text-center">
+                      <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
                         adv.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
                         adv.status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
                         'bg-rose-100 text-rose-800'
                       }`}>
-                        {adv.status === 'approved' ? '✓ IMEIDHINISHWA' :
-                         adv.status === 'pending' ? '⏳ INASUBIRI KUKAGULIWA' : '❌ IMEKATALIWA'}
+                        {adv.status === 'approved' ? '✓' :
+                         adv.status === 'pending' ? '⏳' : '✗'}
                       </span>
                     </td>
-                    <td className="py-3 px-3 font-mono text-[11px] text-[#605E5C]">
+                    <td className="py-2 px-2 font-mono text-[9px] text-[#605E5C] hidden md:table-cell">
                       {adv.status === 'approved' ? (
                         <div>
-                          <div className="text-emerald-900 font-bold">{adv.disbursedMethod}</div>
-                          <div className="text-[10px]">{adv.referenceNumber}</div>
+                          <div className="text-emerald-900 font-bold truncate">{adv.disbursedMethod}</div>
+                          <div className="text-[9px] truncate">{adv.referenceNumber}</div>
                         </div>
                       ) : (
                         <span>-</span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="py-2 px-2 text-center">
                       {adv.status === 'pending' && canAdvances ? (
-                        <div className="flex items-center justify-center gap-1.5">
+                        <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => handleApproveAdvance(adv.id)}
-                            className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer text-xs font-bold inline-flex items-center gap-1"
+                            className="p-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer inline-flex items-center"
                           >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Idhinisha</span>
+                            <Check className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => handleRejectAdvance(adv.id)}
-                            className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer text-xs font-bold inline-flex items-center gap-1"
+                            className="p-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer inline-flex items-center"
                           >
-                            <X className="w-3.5 h-3.5" />
-                            <span>Kataa</span>
+                            <X className="w-3 h-3" />
                           </button>
                         </div>
                       ) : adv.status === 'pending' ? (
-                        <span className="text-[11px] text-[#605E5C] font-medium">{isSw ? 'Inasubiri mmiliki' : 'Awaiting owner approval'}</span>
+                        <span className="text-[9px] text-[#605E5C]">{isSw ? 'Inasubiri' : 'Pending'}</span>
                       ) : (
-                        <span className="text-[11px] text-[#605E5C] font-medium">{isSw ? 'Tayari imekamilika' : 'Completed'}</span>
+                        <span className="text-[9px] text-[#605E5C]">{isSw ? 'Imekamilika' : 'Done'}</span>
                       )}
                     </td>
                   </tr>

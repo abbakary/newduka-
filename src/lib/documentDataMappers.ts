@@ -233,19 +233,35 @@ function escHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
+export type ProductScanLabelPrintRow = {
+  name: string;
+  sku: string;
+  price: number;
+  qrDataUrl: string;
+  barcodeDataUrl?: string;
+  barcodeValue?: string;
+};
+
 export function qrLabelsPrintHtml(
-  labels: { name: string; sku: string; price: number; qrDataUrl: string }[],
+  labels: ProductScanLabelPrintRow[],
   isSw: boolean,
 ): string {
-  const cards = labels.map(l => `
+  const cards = labels.map(l => {
+    const barcodeBlock = l.barcodeDataUrl
+      ? `<img src="${l.barcodeDataUrl}" alt="Barcode" style="max-width:100%;height:48px;object-fit:contain;margin-top:8px" />`
+      : '';
+    return `
     <div style="display:inline-block;width:48%;margin:1%;padding:10px;border:1px dashed #CBD5E1;border-radius:8px;text-align:center;vertical-align:top;page-break-inside:avoid">
       <img src="${l.qrDataUrl}" alt="QR" style="width:120px;height:120px;object-fit:contain" />
+      ${barcodeBlock}
       <div style="font-size:12px;font-weight:800;margin-top:6px">${escHtml(l.name)}</div>
       <div style="font-size:10px;color:#64748B">SKU: ${escHtml(l.sku)}</div>
+      ${l.barcodeValue ? `<div style="font-size:9px;color:#64748B;font-family:monospace">${escHtml(l.barcodeValue)}</div>` : ''}
       <div style="font-size:11px;font-weight:700;margin-top:4px">TSh ${l.price.toLocaleString('en-TZ')}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   return `
-    <h1 style="font-size:16px;margin:0 0 12px">${isSw ? 'Lebo za QR za Bidhaa' : 'Product QR Shelf Labels'}</h1>
+    <h1 style="font-size:16px;margin:0 0 12px;text-align:center">${isSw ? 'Lebo za QR & Barcode' : 'Product QR & Barcode Shelf Labels'}</h1>
     <div style="font-size:0">${cards}</div>`;
 }

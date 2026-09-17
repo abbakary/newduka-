@@ -1802,6 +1802,7 @@ export default function DukaPortal() {
                     lowStockCount={lowStockCount}
                     overdueCreditCount={overdueCreditCount}
                     activeBranchId={resolveApiBranchId()}
+                    currentUser={currentUser}
                   />
                 )}
 

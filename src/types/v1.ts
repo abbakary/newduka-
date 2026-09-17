@@ -49,6 +49,8 @@ export interface Product {
   name: string;
   category: string;
   sku: string;
+  /** EAN/Code128 value for USB 1D scanners (defaults to SKU when unset). */
+  barcode?: string;
   price: number; // Selling price in TSh
   cost: number; // Cost price in TSh
   stock: number;

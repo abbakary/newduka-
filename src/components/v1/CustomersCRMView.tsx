@@ -26,6 +26,9 @@ import { ActionBar } from '@/components/v1/ActionBar';
 import { exportCustomerLedger } from '@/utils/reportGenerator';
 import confetti from 'canvas-confetti';
 import { api } from '@/lib/api';
+import { PageSectionHeader } from '@/components/v1/PageSectionHeader';
+import { useTaxCompliance } from '@/context/TaxComplianceContext';
+import { BusinessPageSubtitle } from '@/lib/businessPageSubtitle';
 import { mapCustomer, customerToApiPayload, filterByBranchId } from '@/lib/apiSync';
 import { runWithOfflineQueue } from '@/lib/offlineMutations';
 import { useOfflineStore } from '@/stores';
@@ -59,6 +62,7 @@ export const CustomersCRMView: React.FC<CustomersCRMViewProps> = ({
   const t = (key: any) => getTranslation(language, key);
   const isSw = language === 'sw';
   const isOnline = useOfflineStore(s => s.isOnline);
+  const { settings: taxSettings } = useTaxCompliance();
   const storageId = tenantId || currentUser?.businessId || currentUser?.id || 'local';
   const enqueue = enqueueSyncItem ?? (() => {});
 
@@ -241,24 +245,28 @@ export const CustomersCRMView: React.FC<CustomersCRMViewProps> = ({
 
   return (
     <div className="space-y-5 pb-12">
-      {/* View Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-[#323130] tracking-tight">{t('customers')}</h2>
-          <p className="text-xs text-[#605E5C]">
-            Integrated CRM • Credit Scoring • 5-Stage Dunning Workflow • Loyalty Rewards
-          </p>
-        </div>
-
-        <button
-          id="btn-register-customer-top"
-          onClick={() => setIsAddingNew(!isAddingNew)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#6264A7] hover:bg-[#555793] text-white font-semibold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{isAddingNew ? t('cancel') : t('addCustomer')}</span>
-        </button>
-      </div>
+      <PageSectionHeader
+        icon={<Users className="w-5 h-5" />}
+        title={t('customers')}
+        subtitle={
+          <BusinessPageSubtitle
+            currentUser={currentUser}
+            taxSettings={taxSettings}
+            isSw={isSw}
+            detail="Integrated CRM • Credit Scoring • Dunning • Loyalty"
+          />
+        }
+        toolbar={
+          <button
+            id="btn-register-customer-top"
+            onClick={() => setIsAddingNew(!isAddingNew)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#6264A7] hover:bg-[#555793] text-white font-semibold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{isAddingNew ? t('cancel') : t('addCustomer')}</span>
+          </button>
+        }
+      />
 
       {/* Action Notification Toast */}
       {smsNotificationMsg && (

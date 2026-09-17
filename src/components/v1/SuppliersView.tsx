@@ -73,6 +73,8 @@ import {
   type PurchaseVatScope,
 } from '@/lib/purchaseTax';
 import { useTaxCompliance } from '@/context/TaxComplianceContext';
+import { PageSectionHeader } from '@/components/v1/PageSectionHeader';
+import { BusinessPageSubtitle } from '@/lib/businessPageSubtitle';
 import { isVatActive } from '@/lib/taxComplianceSettings';
 import { ProductImageThumb, ProductImageUploader } from '@/components/v1/ProductImage';
 
@@ -789,39 +791,42 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
         </div>
       )}
 
-      {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-[#323130] tracking-tight">{t('suppliers')} & {t('purchaseOrders')}</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#6264A7]/10 text-[#6264A7] border border-[#6264A7]/20">
-              Connected Hub
-            </span>
-          </div>
-          <p className="text-xs text-[#605E5C] mt-0.5">
-            1-Click Automated Inward Stocking • Dynamic PO Builder • Live Inventory & Payables Sync
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            id="btn-create-po-top"
-            onClick={() => setIsCreatingPO(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#6264A7] hover:bg-[#555793] text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
-          >
-            <PackagePlus className="w-4 h-4" />
-            <span>{isSw ? 'Ombi la Nukuu Bei (RFQ)' : 'Request for Quotation'}</span>
-          </button>
-
-          <button
-            onClick={() => setIsAddingSupplier(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-[#F3F2F1] text-[#323130] text-xs font-semibold border border-[#E1DFDD] transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4 text-[#0078D4]" />
-            <span>Add Supplier</span>
-          </button>
-        </div>
-      </div>
+      <PageSectionHeader
+        icon={<Truck className="w-5 h-5" />}
+        title={`${t('suppliers')} & ${t('purchaseOrders')}`}
+        subtitle={
+          <BusinessPageSubtitle
+            currentUser={currentUser}
+            taxSettings={taxSettings}
+            isSw={isSw}
+            detail="1-Click inward stocking • PO builder • Live inventory & payables sync"
+          />
+        }
+        badge={
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#6264A7]/10 text-[#6264A7] border border-[#6264A7]/20">
+            Connected Hub
+          </span>
+        }
+        toolbar={
+          <>
+            <button
+              id="btn-create-po-top"
+              onClick={() => setIsCreatingPO(true)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#6264A7] hover:bg-[#555793] text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
+            >
+              <PackagePlus className="w-4 h-4" />
+              <span>{isSw ? 'Ombi la Nukuu Bei (RFQ)' : 'Request for Quotation'}</span>
+            </button>
+            <button
+              onClick={() => setIsAddingSupplier(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-[#F3F2F1] text-[#323130] text-xs font-semibold border border-[#E1DFDD] transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-[#0078D4]" />
+              <span>Add Supplier</span>
+            </button>
+          </>
+        }
+      />
 
       {/* KPI Overview Tiles */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -970,17 +975,26 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
 
           {/* Orders Table */}
           <div className="bg-white rounded-xl border border-[#E1DFDD] shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div>
+              <table className="w-full text-left text-[10px] sm:text-xs" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '18%' }} />
+                  <col style={{ width: '20%' }} />
+                  <col className="hidden md:table-column" style={{ width: '18%' }} />
+                  <col className="hidden sm:table-column" style={{ width: '14%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '12%' }} />
+                  <col style={{ width: '14%' }} />
+                </colgroup>
                 <thead className="bg-[#F8F8F8] border-b border-[#EDEBE9] text-[#605E5C] font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">PO Number & Date</th>
-                    <th className="py-3 px-3">Supplier Partner</th>
-                    <th className="py-3 px-3">Items Ordered</th>
-                    <th className="py-3 px-3">Expected Delivery</th>
-                    <th className="py-3 px-3">Total Amount</th>
-                    <th className="py-3 px-3">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    <th className="py-2 px-2">{isSw ? 'PO & Tarehe' : 'PO & Date'}</th>
+                    <th className="py-2 px-2">{isSw ? 'Msambazaji' : 'Supplier'}</th>
+                    <th className="py-2 px-2 hidden md:table-cell">{isSw ? 'Bidhaa' : 'Items'}</th>
+                    <th className="py-2 px-2 hidden sm:table-cell">{isSw ? 'Uwasilishaji' : 'Delivery'}</th>
+                    <th className="py-2 px-2 text-right">{isSw ? 'Jumla' : 'Total'}</th>
+                    <th className="py-2 px-2">{isSw ? 'Hali' : 'Status'}</th>
+                    <th className="py-2 px-2 text-right">{isSw ? 'Vitendo' : 'Actions'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F3F2F1]">
@@ -1000,55 +1014,55 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
                           key={po.id}
                           className="hover:bg-[#FAF9F8] transition-colors"
                         >
-                          <td className="py-3 px-4">
-                            <div className="font-bold text-[#0078D4] font-mono">{po.poNumber}</div>
-                            <div className="text-[10px] text-[#605E5C]">{po.dateCreated}</div>
+                          <td className="py-2 px-2">
+                            <div className="font-bold text-[#0078D4] font-mono truncate">{po.poNumber}</div>
+                            <div className="text-[9px] text-[#605E5C]">{po.dateCreated}</div>
                           </td>
 
-                          <td className="py-3 px-3">
-                            <div className="font-bold text-[#323130]">{po.supplierName}</div>
-                            <div className="text-[10px] text-[#605E5C]">{po.paymentTerms}</div>
+                          <td className="py-2 px-2">
+                            <div className="font-bold text-[#323130] truncate">{po.supplierName}</div>
+                            <div className="text-[9px] text-[#605E5C] truncate">{po.paymentTerms}</div>
                           </td>
 
-                          <td className="py-3 px-3">
+                          <td className="py-2 px-2 hidden md:table-cell">
                             <div className="font-semibold text-[#323130]">
-                              {po.items.length} line items ({po.items.reduce((s, i) => s + i.quantity, 0)} units)
+                              {po.items.length} ({po.items.reduce((s, i) => s + i.quantity, 0)} {isSw ? 'vipande' : 'units'})
                             </div>
-                            <div className="text-[10px] text-[#605E5C] truncate max-w-[200px]">
+                            <div className="text-[9px] text-[#605E5C] truncate">
                               {po.items.map(i => i.productName).join(', ')}
                             </div>
                           </td>
 
-                          <td className="py-3 px-3 font-mono">
-                            <div className="text-[#323130] font-medium">{po.expectedDate}</div>
+                          <td className="py-2 px-2 font-mono hidden sm:table-cell">
+                            <div className="text-[#323130] font-medium truncate">{po.expectedDate}</div>
                             {isReceived && (
-                              <div className="text-[10px] text-[#107C10] font-semibold flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3 text-[#107C10]" /> Received on {po.receivedDate?.split(' ')[0]}
+                              <div className="text-[9px] text-[#107C10] font-semibold flex items-center gap-0.5">
+                                <CheckCircle2 className="w-2.5 h-2.5 text-[#107C10] shrink-0" /> {po.receivedDate?.split(' ')[0]}
                               </div>
                             )}
                           </td>
 
-                          <td className="py-3 px-3">
-                            <div className="font-extrabold text-[#323130]">{formatTSh(po.totalAmount)}</div>
-                            <div className="text-[10px] text-[#605E5C]">
-                              {po.paymentStatus === 'paid' ? '✓ Paid in Full' : 'Unsettled Credit'}
+                          <td className="py-2 px-2 text-right">
+                            <div className="font-extrabold text-[#323130] truncate">{formatTSh(po.totalAmount)}</div>
+                            <div className="text-[9px] text-[#605E5C]">
+                              {po.paymentStatus === 'paid' ? '✓ Paid' : 'Credit'}
                             </div>
                           </td>
 
-                          <td className="py-3 px-3">
-                            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          <td className="py-2 px-2">
+                            <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                               isReceived
                                 ? 'bg-[#107C10]/10 text-[#107C10] border border-[#107C10]/30'
                                 : isPending
                                 ? 'bg-amber-100 text-amber-900 border border-amber-300'
                                 : 'bg-[#EDEBE9] text-[#605E5C]'
                             }`}>
-                              {isReceived ? '✓ Stocked in Inventory' : isPending ? '⏳ Awaiting Delivery' : 'Draft'}
+                              {isReceived ? '✓ Received' : isPending ? '⏳ Pending' : 'Draft'}
                             </span>
                           </td>
 
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                          <td className="py-2 px-2 text-right">
+                            <div className="flex items-center justify-end gap-1">
                               {/* 1-CLICK RECEIVE & STOCK-IN BUTTON */}
                               {isPending && (
                                 <>
@@ -1239,16 +1253,27 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
           </div>
 
           <div className="bg-white rounded-xl border border-[#E1DFDD] shadow-xs overflow-hidden">
-            <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div>
+              <table className="w-full text-left text-[10px] sm:text-xs" style={{ tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '20%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col className="hidden sm:table-column" style={{ width: '14%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col className="hidden md:table-column" style={{ width: '10%' }} />
+                </colgroup>
               <thead className="bg-[#F8F8F8] border-b border-[#EDEBE9] text-[#605E5C] font-bold uppercase">
                 <tr>
-                  <th className="py-3 px-4">Date & Time</th>
-                  <th className="py-3 px-3">Supplier Name</th>
-                  <th className="py-3 px-3">Payment Method</th>
-                  <th className="py-3 px-3">Reference / Txn ID</th>
-                  <th className="py-3 px-3">Amount Paid</th>
-                  <th className="py-3 px-3">Balance After</th>
-                  <th className="py-3 px-4">Notes</th>
+                  <th className="py-2 px-2">{isSw ? 'Tarehe' : 'Date'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Msambazaji' : 'Supplier'}</th>
+                  <th className="py-2 px-2">{isSw ? 'Njia' : 'Method'}</th>
+                  <th className="py-2 px-2 hidden sm:table-cell">{isSw ? 'Kumbukumbu' : 'Reference'}</th>
+                  <th className="py-2 px-2 text-right">{isSw ? 'Kiasi' : 'Amount'}</th>
+                  <th className="py-2 px-2 text-right">{isSw ? 'Deni Baada' : 'Balance'}</th>
+                  <th className="py-2 px-2 hidden md:table-cell">{isSw ? 'Maelezo' : 'Notes'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F3F2F1]">
@@ -1261,18 +1286,19 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
                 ) : (
                   supplierPayments.map(sp => (
                     <tr key={sp.id} className="hover:bg-[#FAF9F8]">
-                      <td className="py-3 px-4 font-mono text-[#605E5C]">{sp.date}</td>
-                      <td className="py-3 px-3 font-bold text-[#323130]">{sp.supplierName}</td>
-                      <td className="py-3 px-3 font-semibold text-[#0078D4]">{sp.paymentMethod}</td>
-                      <td className="py-3 px-3 font-mono text-[#605E5C]">{sp.referenceNumber}</td>
-                      <td className="py-3 px-3 font-extrabold text-[#107C10]">{formatTSh(sp.amount)}</td>
-                      <td className="py-3 px-3 font-mono text-[#D13438]">{formatTSh(sp.balanceAfter)}</td>
-                      <td className="py-3 px-4 text-[#605E5C]">{sp.notes || '-'}</td>
+                      <td className="py-2 px-2 font-mono text-[#605E5C] truncate">{sp.date}</td>
+                      <td className="py-2 px-2 font-bold text-[#323130] truncate">{sp.supplierName}</td>
+                      <td className="py-2 px-2 font-semibold text-[#0078D4] truncate">{sp.paymentMethod}</td>
+                      <td className="py-2 px-2 font-mono text-[#605E5C] truncate hidden sm:table-cell">{sp.referenceNumber}</td>
+                      <td className="py-2 px-2 font-extrabold text-[#107C10] text-right">{formatTSh(sp.amount)}</td>
+                      <td className="py-2 px-2 font-mono text-[#D13438] text-right">{formatTSh(sp.balanceAfter)}</td>
+                      <td className="py-2 px-2 text-[#605E5C] truncate hidden md:table-cell">{sp.notes || '-'}</td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}

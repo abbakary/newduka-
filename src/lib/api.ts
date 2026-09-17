@@ -189,6 +189,18 @@ class ApiClient {
   updateProduct(id: string, data: Record<string, unknown>) {
     return this.request(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
   }
+  getProductScanLabels(productId: string) {
+    return this.request<{
+      product_id: string;
+      name: string;
+      sku: string;
+      barcode_value: string;
+      qr_payload: string;
+      qr_png_base64: string;
+      barcode_png_base64: string;
+      format: string;
+    }>(`/products/${productId}/scan-labels`);
+  }
   getCustomersPage(search?: string, skip = 0, limit = 500, branchId?: string | null) {
     const params = new URLSearchParams({ skip: String(skip), limit: String(limit), ...branchScopeParams(branchId) });
     if (search) params.set('search', search);
